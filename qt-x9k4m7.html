@@ -187,9 +187,31 @@
       .edit-box textarea { font-family: inherit; font-size: 0.95rem; }
       .new-link-box { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 0 0 14px; word-break: break-all; font-size: 0.85rem; }
 
+      .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 16px; border-bottom: 2px solid var(--line); }
+      .tab-btn {
+        border: 1px solid transparent; border-bottom: none; background: transparent; color: var(--ink-soft);
+        border-radius: 10px 10px 0 0; padding: 9px 16px; font-weight: 700; font-size: 0.95rem; min-height: 2.6rem;
+      }
+      .tab-btn:hover { background: var(--surface-2); color: var(--ink); }
+      .tab-btn.active { background: var(--surface); border-color: var(--line); color: var(--accent); box-shadow: 0 2px 0 var(--surface); margin-bottom: -2px; padding-bottom: 11px; }
+      .tab-panel[hidden] { display: none; }
+      .subhead { font-size: 1rem; margin: 18px 0 4px; padding-top: 16px; border-top: 1px solid var(--line); }
+      .subhead:first-of-type { border-top: none; padding-top: 0; margin-top: 6px; }
+      .sort-row { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; margin-top: 12px; }
+      .sort-row .sort-label { font-size: 0.88rem; font-weight: 600; color: var(--ink-soft); margin-right: 2px; }
+      .sort-btn {
+        border: 1px solid var(--line); background: var(--surface-2); color: var(--ink);
+        border-radius: 999px; padding: 5px 12px; font-weight: 600; font-size: 0.86rem; min-height: 2.25rem;
+      }
+      .sort-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+      .quick-row { display: flex; gap: 8px; align-items: stretch; }
+      .quick-row input { flex: 1 1 auto; min-width: 0; }
+      .quick-row .btn { flex: none; }
+      .manual-result { margin-top: 10px; }
       @media (max-width: 560px) {
         section.card { padding: 14px; }
         header.top h1 { font-size: 1.35rem; }
+        .tab-btn { padding: 8px 11px; font-size: 0.89rem; }
       }
     </style>
   </head>
@@ -200,6 +222,13 @@
         <p>Trang dành riêng cho chủ tài khoản: nhập tài khoản lên máy chủ của thầy, tạo link share gửi cho người dùng. Người dùng chỉ thấy trang xem tài khoản — không thấy được key 2FA, cũng không lần ra được trang này.</p>
       </header>
 
+      <nav class="tabs" role="tablist" aria-label="Các mục quản trị">
+        <button type="button" class="tab-btn" role="tab" id="tabbtn-conn" data-tab="conn" aria-selected="true">Kết nối máy chủ</button>
+        <button type="button" class="tab-btn" role="tab" id="tabbtn-import" data-tab="import" aria-selected="false">Nhập tài khoản</button>
+        <button type="button" class="tab-btn" role="tab" id="tabbtn-list" data-tab="list" aria-selected="false">Tài khoản trên máy chủ</button>
+      </nav>
+
+      <div class="tab-panel" id="panel-conn" role="tabpanel">
       <!-- ============ 1. CÀI ĐẶT ============ -->
       <section class="card" id="sec-settings">
         <h2><span class="step-num">1</span> Kết nối máy chủ (Apps Script)</h2>
@@ -240,10 +269,22 @@
         <div class="status" id="connStatus" role="status" aria-live="polite"></div>
       </section>
 
-      <!-- ============ 2. NHẬP NHANH ============ -->
+      <div class="safety">
+        <strong>Lưu ý an toàn</strong>
+        <ul>
+          <li>Không chia sẻ địa chỉ trang quản trị này và mã bí mật quản trị cho người dùng — ai có mã bí mật là xem được toàn bộ tài khoản và key 2FA.</li>
+          <li>Link share chỉ gửi cho đúng người nhận; ai có link là xem được email, mật khẩu và mã dùng 1 lần của tài khoản đó.</li>
+          <li>Khi không cần chia sẻ nữa, bấm <b>Xoá</b> trong danh sách để thu hồi — link share sẽ chết ngay.</li>
+        </ul>
+      </div>
+      </div>
+
+      <div class="tab-panel" id="panel-import" role="tabpanel" hidden>
+      <!-- ============ 2. NHẬP TÀI KHOẢN ============ -->
       <section class="card" id="sec-import">
-        <h2><span class="step-num">2</span> Nhập nhanh tài khoản</h2>
-        <p class="hint">Mỗi dòng một tài khoản theo định dạng <code class="inline">email|pass|key 2fa</code>. Muốn đặt tên hiển thị, thêm thành phần thứ 4: <code class="inline">email|pass|key 2fa|Tên tài khoản</code>. Nếu không ghi tên, hệ thống đặt tên mặc định là <b>Chat GPT Plus 1 tháng</b>. Tài khoản mới tự có hạn dùng 30 ngày kể từ ngày tạo — sửa lại được trong danh sách bên dưới.</p>
+        <h2><span class="step-num">2</span> Nhập tài khoản</h2>
+        <h3 class="subhead">Nhập nhanh</h3>
+        <p class="hint">Mỗi dòng một tài khoản theo định dạng <code class="inline">email|pass|key 2fa</code>. Muốn đặt tên hiển thị, thêm thành phần thứ 4: <code class="inline">email|pass|key 2fa|Tên tài khoản</code>. Nếu không ghi tên, hệ thống đặt tên mặc định là <b>Chat GPT Plus 1 tháng</b>. Tài khoản mới tự có hạn dùng 30 ngày kể từ ngày tạo — sửa lại được trong danh sách.</p>
         <div class="field">
           <label for="inBulk">Dán danh sách tài khoản</label>
           <textarea id="inBulk" rows="6" placeholder="vd: nguyenvana@gmail.com|MatKhau123|JBSWY3DPEHPK3PXP&#10;tranb@gmail.com|Pass456|JBSWY3DPEHPK3PXP|Tài khoản học viên B" spellcheck="false"></textarea>
@@ -254,8 +295,44 @@
           <span class="progress" id="importProgress" aria-live="polite"></span>
         </div>
         <div id="previewWrap"></div>
-      </section>
 
+        <h3 class="subhead">Nhập thủ công</h3>
+        <p class="hint">Điền từng trường cho một tài khoản rồi bấm Thêm tài khoản.</p>
+        <div class="field">
+          <label for="mfName">Tên tài khoản</label>
+          <input type="text" id="mfName" placeholder="Để trống = Chat GPT Plus 1 tháng" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="mfEmail">Email</label>
+          <input type="text" id="mfEmail" placeholder="vd: nguyenvana@gmail.com" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label for="mfPass">Mật khẩu</label>
+          <input type="text" id="mfPass" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label for="mfKey">Key 2FA</label>
+          <input type="text" id="mfKey" autocomplete="off" spellcheck="false" />
+          <span class="sub">Chỉ gồm ký tự Base32 (A–Z, 2–7).</span>
+        </div>
+        <div class="field">
+          <label for="mfNote">Ghi chú</label>
+          <textarea id="mfNote" rows="2" placeholder="vd: Đã giao cho học viên A ngày…"></textarea>
+        </div>
+        <div class="field">
+          <label for="mfExpires">Hạn dùng (ngày hết hạn)</label>
+          <input type="date" id="mfExpires" />
+          <span class="sub">Mặc định 30 ngày kể từ hôm nay — sửa lại được nếu cần.</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="btnManualAdd" type="button">Thêm tài khoản</button>
+        </div>
+        <div class="status" id="manualStatus" role="status" aria-live="polite"></div>
+        <div class="manual-result" id="manualResult"></div>
+      </section>
+      </div>
+
+      <div class="tab-panel" id="panel-list" role="tabpanel" hidden>
       <!-- ============ 3. DANH SÁCH ============ -->
       <section class="card" id="sec-list">
         <h2><span class="step-num">3</span> Tài khoản trên máy chủ</h2>
@@ -266,17 +343,16 @@
             <input type="search" id="inSearch" placeholder="Tìm theo tên hoặc email…" aria-label="Tìm theo tên hoặc email" />
           </div>
         </div>
+        <div class="sort-row" id="sortRow" role="group" aria-label="Sắp xếp danh sách">
+          <span class="sort-label">Sắp xếp theo:</span>
+          <button type="button" class="sort-btn" data-sort="name">Tên tài khoản</button>
+          <button type="button" class="sort-btn" data-sort="email">Email</button>
+          <button type="button" class="sort-btn" data-sort="expiresAt">Hạn dùng</button>
+          <button type="button" class="sort-btn" data-sort="createdAt">Ngày tạo</button>
+        </div>
         <div class="status" id="listStatus" role="status" aria-live="polite"></div>
         <div id="listWrap"></div>
       </section>
-
-      <div class="safety">
-        <strong>Lưu ý an toàn</strong>
-        <ul>
-          <li>Không chia sẻ địa chỉ trang quản trị này và mã bí mật quản trị cho người dùng — ai có mã bí mật là xem được toàn bộ tài khoản và key 2FA.</li>
-          <li>Link share chỉ gửi cho đúng người nhận; ai có link là xem được email, mật khẩu và mã dùng 1 lần của tài khoản đó.</li>
-          <li>Khi không cần chia sẻ nữa, bấm <b>Xoá</b> trong danh sách để thu hồi — link share sẽ chết ngay.</li>
-        </ul>
       </div>
     </div>
 
@@ -368,6 +444,24 @@
         $("setupGuide").hidden = !!(s.url && s.secret);
         if (!silent) toast("Đã lưu cài đặt trên trình duyệt này");
       }
+      /* ---------- Tabs ---------- */
+      function showTab(name) {
+        ["conn", "import", "list"].forEach(function (k) {
+          var panel = $("panel-" + k);
+          var btn = $("tabbtn-" + k);
+          var active = (k === name);
+          if (panel) panel.hidden = !active;
+          if (btn) { btn.classList.toggle("active", active); btn.setAttribute("aria-selected", active ? "true" : "false"); }
+        });
+      }
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () { showTab(btn.getAttribute("data-tab")); });
+      });
+      function goToSettingsField(id) {
+        showTab("conn");
+        var el = $(id);
+        if (el) el.focus();
+      }
       function looksLikeExecUrl(u) {
         return /^https:\/\/script\.google\.com\/macros\/s\/[^/\s]+\/exec\/?$/.test(String(u || "").trim());
       }
@@ -378,7 +472,7 @@
         return new Promise(function (resolve, reject) {
           var s = getSettings();
           var url = String(s.url || "").replace(/\s+/g, "");
-          if (!url) { reject(new Error("Chưa điền Địa chỉ Web App Apps Script ở mục 1.")); return; }
+          if (!url) { reject(new Error("Chưa điền Địa chỉ Web App Apps Script ở tab Kết nối máy chủ.")); return; }
           var cbName = "__cs_cb_" + Date.now() + "_" + (++jsonpSeq);
           var qs = [];
           Object.keys(params).forEach(function (k) { qs.push(encodeURIComponent(k) + "=" + encodeURIComponent(params[k])); });
@@ -417,8 +511,8 @@
       }
       function needSecret() {
         var s = getSettings();
-        if (!s.url) { toast("Chưa điền Địa chỉ Web App Apps Script ở mục 1", true); return null; }
-        if (!s.secret) { toast("Chưa nhập Mã bí mật quản trị ở mục 1", true); return null; }
+        if (!s.url) { toast("Chưa điền Địa chỉ Web App Apps Script ở tab Kết nối máy chủ", true); return null; }
+        if (!s.secret) { toast("Chưa nhập Mã bí mật quản trị ở tab Kết nối máy chủ", true); return null; }
         return s;
       }
       function apiError(data) {
@@ -442,8 +536,8 @@
       function copyShareLink(id) {
         var link = buildShareLink(id);
         if (!link) {
-          toast("Cần điền Địa chỉ trang xem tài khoản ở mục 1 trước khi tạo link share", true);
-          $("inViewerBase").focus();
+          toast("Cần điền Địa chỉ trang xem tài khoản ở tab Kết nối máy chủ trước khi tạo link share", true);
+          goToSettingsField("inViewerBase");
           return;
         }
         copyText(link, "Đã copy link share");
@@ -587,7 +681,7 @@
                 var link = buildShareLink(d.id);
                 cell.innerHTML = link
                   ? '<div class="cell-link mono">' + esc(link) + '</div><button type="button" class="btn small" data-copy-link="' + esc(d.id) + '">Copy link</button>'
-                  : '<span class="muted">Đã nhập (mã: ' + esc(d.id) + '). Điền Địa chỉ trang xem ở mục 1 để có link share.</span> <button type="button" class="btn small" data-copy-link="' + esc(d.id) + '">Copy link</button>';
+                  : '<span class="muted">Đã nhập (mã: ' + esc(d.id) + '). Điền Địa chỉ trang xem ở tab Kết nối máy chủ để có link share.</span> <button type="button" class="btn small" data-copy-link="' + esc(d.id) + '">Copy link</button>';
               }
             } else {
               failed++;
@@ -604,8 +698,113 @@
         step(0);
       });
 
+      /* ---------- Nhập thủ công ---------- */
+      var listLoaded = false;
+      function defaultExpiryInputValue() {
+        var d = new Date();
+        d.setDate(d.getDate() + 30);
+        return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+      }
+      function initManualExpiry() {
+        var el = $("mfExpires");
+        if (el && !el.value) el.value = defaultExpiryInputValue();
+      }
+      function dateInputToISO(v) {
+        if (!v) return "";
+        var d = new Date(v + "T23:59:59");
+        if (isNaN(d.getTime())) return "";
+        return d.toISOString();
+      }
+      $("btnManualAdd").addEventListener("click", function () {
+        saveSettings(true);
+        var st = $("manualStatus");
+        var result = $("manualResult");
+        var name = $("mfName").value.trim();
+        var email = $("mfEmail").value.trim();
+        var pass = $("mfPass").value;
+        var keyRaw = $("mfKey").value;
+        var note = $("mfNote").value;
+        var expVal = $("mfExpires").value;
+        var errs = [];
+        if (email.indexOf("@") < 0) errs.push("Email không có dấu @.");
+        if (!pass) errs.push("Mật khẩu trống.");
+        var keyNorm = keyRaw.replace(/[\s-]/g, "").toUpperCase();
+        if (!/^[A-Z2-7]+$/.test(keyNorm) || keyNorm.length < 8) errs.push("Key 2FA không hợp lệ — chỉ gồm ký tự Base32 (A–Z, 2–7) và dài tối thiểu 8 ký tự.");
+        if (errs.length) { st.className = "status err"; st.textContent = errs.join(" "); return; }
+        var s = needSecret(); if (!s) return;
+        $("btnManualAdd").disabled = true; $("btnManualAdd").textContent = "Đang thêm…";
+        st.className = "status"; st.textContent = "Đang thêm tài khoản lên máy chủ…";
+        result.innerHTML = "";
+        jsonp({
+          action: "add", secret: s.secret,
+          data: JSON.stringify({
+            name: name || DEFAULT_NAME,
+            email: email,
+            pass: pass,
+            key: keyNorm,
+            note: note,
+            expiresAt: dateInputToISO(expVal)
+          })
+        }).then(function (d) {
+          if (!d || !d.ok || !d.id) throw new Error(apiError(d));
+          st.className = "status ok";
+          st.textContent = "Đã thêm tài khoản " + email + " lên hệ thống.";
+          var link = buildShareLink(d.id);
+          result.innerHTML = link
+            ? '<div class="new-link-box"><div style="margin-bottom:8px"><b>Link share của tài khoản vừa tạo:</b></div><div class="mono">' + esc(link) + '</div><div style="margin-top:10px"><button type="button" class="btn small primary" data-copy-link="' + esc(d.id) + '">Copy link</button></div></div>'
+            : '<div class="new-link-box">Đã tạo tài khoản (mã: ' + esc(d.id) + '). Điền Địa chỉ trang xem ở tab Kết nối máy chủ để có link share. <button type="button" class="btn small" data-copy-link="' + esc(d.id) + '">Copy link</button></div>';
+          toast("Đã thêm tài khoản thành công");
+          $("mfName").value = ""; $("mfEmail").value = ""; $("mfPass").value = ""; $("mfKey").value = ""; $("mfNote").value = "";
+          $("mfExpires").value = defaultExpiryInputValue();
+          if (listLoaded) loadList(true);
+        }).catch(function (e) {
+          st.className = "status err";
+          st.textContent = "Thêm tài khoản thất bại: " + e.message;
+        }).then(function () { $("btnManualAdd").disabled = false; $("btnManualAdd").textContent = "Thêm tài khoản"; });
+      });
+
       /* ---------- Danh sách tài khoản ---------- */
       var serverAccounts = [];
+      var sortKey = "expiresAt";
+      var sortDir = 1;
+      function updateSortButtons() {
+        document.querySelectorAll(".sort-btn").forEach(function (b) {
+          var k = b.getAttribute("data-sort");
+          var base = { name: "Tên tài khoản", email: "Email", expiresAt: "Hạn dùng", createdAt: "Ngày tạo" }[k] || k;
+          var active = (k === sortKey);
+          b.classList.toggle("active", active);
+          b.textContent = base + (active ? (sortDir === 1 ? " ↑" : " ↓") : "");
+          b.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+      }
+      document.querySelectorAll(".sort-btn").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var k = b.getAttribute("data-sort");
+          if (sortKey === k) { sortDir = -sortDir; } else { sortKey = k; sortDir = 1; }
+          updateSortButtons();
+          renderList();
+        });
+      });
+      function sortAccounts(rows) {
+        var arr = rows.slice();
+        arr.sort(function (x, y) {
+          var xv, yv, cmp = 0;
+          if (sortKey === "name" || sortKey === "email") {
+            xv = (x[sortKey] || "").toLowerCase(); yv = (y[sortKey] || "").toLowerCase();
+            cmp = xv < yv ? -1 : (xv > yv ? 1 : 0);
+            return cmp * sortDir;
+          }
+          // Date keys: missing values always last
+          xv = x[sortKey] ? new Date(x[sortKey]).getTime() : NaN;
+          yv = y[sortKey] ? new Date(y[sortKey]).getTime() : NaN;
+          var xBad = isNaN(xv), yBad = isNaN(yv);
+          if (xBad && yBad) return 0;
+          if (xBad) return 1;
+          if (yBad) return -1;
+          return (xv - yv) * sortDir;
+        });
+        return arr;
+      }
       function fmtDate(v) {
         if (!v) return "—";
         var d = new Date(v);
@@ -635,10 +834,10 @@
       function renderList() {
         var wrap = $("listWrap");
         var q = $("inSearch").value.trim().toLowerCase();
-        var rows = serverAccounts.filter(function (a) {
+        var rows = sortAccounts(serverAccounts.filter(function (a) {
           if (!q) return true;
           return (a.name || "").toLowerCase().indexOf(q) >= 0 || (a.email || "").toLowerCase().indexOf(q) >= 0;
-        });
+        }));
         if (!serverAccounts.length) { wrap.innerHTML = ""; return; }
         if (!rows.length) { wrap.innerHTML = '<div class="empty-note">Không có tài khoản nào khớp với từ khoá tìm kiếm.</div>'; return; }
         var html = '<div class="table-scroll"><table class="list-table"><thead><tr>' +
@@ -680,6 +879,7 @@
         jsonp({ action: "list", secret: s.secret }).then(function (d) {
           if (!d || !d.ok) throw new Error(apiError(d));
           serverAccounts = (d.accounts || []).map(function (a) { a._showPw = false; return a; });
+          listLoaded = true;
           renderList();
           st.className = "status ok";
           st.textContent = "Đã tải " + serverAccounts.length + " tài khoản từ máy chủ.";
@@ -733,6 +933,10 @@
           '<div class="confirm-backdrop"><div class="edit-box" role="dialog" aria-modal="true" aria-label="Sửa tài khoản">' +
           "<h3>Sửa tài khoản</h3>" +
           '<p class="sub">Chỉnh mọi thông tin rồi bấm Lưu thay đổi. Mật khẩu và Key 2FA đang hiện giá trị hiện tại — xoá trắng ô nào thì máy chủ giữ nguyên giá trị cũ của ô đó.</p>' +
+          '<div class="field"><label for="edQuick">Thông tin nhanh</label>' +
+          '<div class="quick-row"><input type="text" id="edQuick" value="' + esc((acc.email || "") + "|" + (acc.pass || "") + "|" + curKey) + '" autocomplete="off" spellcheck="false" />' +
+          '<button type="button" class="btn small" id="edQuickCopy">Copy</button></div>' +
+          '<span class="sub">Định dạng email|pass|key 2fa — sửa ở đây hoặc sửa 3 ô Email / Mật khẩu / Key 2FA bên dưới, hai bên tự đồng bộ ngay khi gõ.</span></div>' +
           '<div class="field"><label for="edName">Tên tài khoản</label>' +
           '<input type="text" id="edName" value="' + esc(acc.name || "") + '" autocomplete="off" /></div>' +
           '<div class="field"><label for="edEmail">Email</label>' +
@@ -754,9 +958,34 @@
         function close() { root.innerHTML = ""; }
         $("edCancel").addEventListener("click", close);
         root.firstElementChild.addEventListener("click", function (e) { if (e.target === this) close(); });
-        $("edName").focus();
+        /* Đồng bộ hai chiều ô thông tin nhanh <-> 3 ô chi tiết */
+        function syncQuickFromDetails() {
+          $("edQuick").value = $("edEmail").value + "|" + $("edPass").value + "|" + $("edKey").value;
+        }
+        function syncDetailsFromQuick() {
+          var v = $("edQuick").value;
+          var parts = v.split("|");
+          if (parts.length < 3) return; // đang gõ dở: không ghi đè các ô dưới
+          $("edEmail").value = parts[0].trim();
+          $("edPass").value = parts[1];
+          $("edKey").value = parts.slice(2).join("|").trim();
+        }
+        ["edEmail", "edPass", "edKey"].forEach(function (id) {
+          $(id).addEventListener("input", syncQuickFromDetails);
+        });
+        $("edQuick").addEventListener("input", syncDetailsFromQuick);
+        $("edQuickCopy").addEventListener("click", function () { copyText($("edQuick").value, "Đã copy thông tin nhanh"); });
+        $("edQuick").focus();
         $("edSave").addEventListener("click", function () {
           var st = $("edStatus");
+          var quickVal = $("edQuick").value;
+          var quickParts = quickVal.split("|");
+          if (quickParts.length < 3) {
+            st.className = "status err";
+            st.textContent = "Ô Thông tin nhanh chưa đúng định dạng email|pass|key 2fa (phải có đủ 3 phần ngăn bằng dấu |). Hãy sửa ô thông tin nhanh hoặc sửa trực tiếp 3 ô Email / Mật khẩu / Key 2FA bên dưới.";
+            $("edQuick").focus();
+            return;
+          }
           var name = $("edName").value.trim();
           var email = $("edEmail").value.trim();
           var pass = $("edPass").value;
@@ -837,7 +1066,7 @@
           "<p>Đã cấp link mới cho <b>" + esc(label) + "</b>. Link cũ đã hết hiệu lực. Gửi link dưới đây cho người dùng:</p>" +
           (link
             ? '<div class="new-link-box mono">' + esc(link) + "</div>"
-            : "<p>Chưa điền Địa chỉ trang xem tài khoản ở mục 1 nên chưa dựng được link đầy đủ. Điền xong, bấm Copy link ở dòng tài khoản trong danh sách là có link mới.</p>") +
+            : "<p>Chưa điền Địa chỉ trang xem tài khoản ở tab Kết nối máy chủ nên chưa dựng được link đầy đủ. Điền xong, bấm Copy link ở dòng tài khoản trong danh sách là có link mới.</p>") +
           '<div class="btn-row">' +
           (link ? '<button type="button" class="btn primary" data-copy-link="' + esc(newId) + '">Copy link mới</button>' : "") +
           '<button type="button" class="btn" id="nlClose">Đóng</button></div>' +
@@ -857,7 +1086,7 @@
             var ol = t.getAttribute("data-open-link");
             if (ol) {
               var link = buildShareLink(ol);
-              if (!link) { toast("Cần điền Địa chỉ trang xem tài khoản ở mục 1 trước", true); $("inViewerBase").focus(); return; }
+              if (!link) { toast("Cần điền Địa chỉ trang xem tài khoản ở tab Kết nối máy chủ trước", true); goToSettingsField("inViewerBase"); return; }
               window.open(link, "_blank", "noopener");
               return;
             }
@@ -884,12 +1113,17 @@
 
       /* ---------- Khởi tạo ---------- */
       loadSettingsIntoForm();
-      // Đã có sẵn cài đặt thì tự kiểm tra kết nối ngay khi mở trang và tải
-      // luôn danh sách, để thấy trạng thái thật mà không phải bấm dò từng nút.
+      initManualExpiry();
+      updateSortButtons();
+      // Đã có sẵn cài đặt thì mở sẵn tab Danh sách, tự kiểm tra kết nối và
+      // tải luôn danh sách; chưa có cài đặt thì mở tab Kết nối máy chủ.
       (function () {
         var s = getSettings();
         if (s.url && s.secret) {
+          showTab("list");
           runConnectionCheck(false).then(function (ok) { if (ok) loadList(true); });
+        } else {
+          showTab("conn");
         }
       })();
     </script>
