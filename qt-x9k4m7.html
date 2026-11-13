@@ -87,7 +87,7 @@
       .field { margin: 0 0 14px; }
       .field label { display: block; font-weight: 600; font-size: 0.92rem; margin-bottom: 5px; }
       .field .sub { display: block; font-weight: 400; color: var(--ink-soft); font-size: 0.84rem; margin-top: 3px; }
-      input[type="text"], input[type="password"], input[type="url"], input[type="search"], textarea, select {
+      input[type="text"], input[type="password"], input[type="url"], input[type="search"], input[type="date"], textarea, select {
         width: 100%; padding: 9px 11px; font: inherit; color: var(--ink);
         background: var(--surface); border: 1px solid var(--line); border-radius: 9px;
       }
@@ -132,11 +132,17 @@
 
       .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin-top: 12px; }
       table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 640px; }
+      table.list-table { min-width: 880px; }
       th, td { text-align: left; padding: 9px 11px; border-bottom: 1px solid var(--line); vertical-align: top; }
       th { background: var(--surface-2); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); white-space: nowrap; }
       tr:last-child td { border-bottom: none; }
       tr.row-bad td { background: var(--err-bg); }
       .cell-err { color: var(--err-ink); font-size: 0.83rem; margin-top: 3px; }
+      .cell-note { max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-soft); font-size: 0.86rem; }
+      .exp { white-space: nowrap; }
+      .exp .exp-when { color: var(--ink-soft); font-size: 0.8rem; display: block; }
+      .exp-bad { color: var(--danger); font-weight: 700; }
+      .exp-soon { color: var(--warn-ink); font-weight: 700; }
       .cell-link { word-break: break-all; font-size: 0.82rem; }
       .pw-mask { letter-spacing: 0.12em; }
       .code6 { font-family: ui-monospace, Consolas, monospace; font-weight: 700; font-size: 1.02rem; letter-spacing: 0.14em; white-space: nowrap; }
@@ -173,6 +179,13 @@
       .confirm-box p { margin: 0 0 16px; color: var(--ink-soft); font-size: 0.93rem; }
       .confirm-box .btn-row { justify-content: flex-end; }
       .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+      .edit-box { background: var(--surface); border-radius: 14px; padding: 20px; max-width: 480px; width: 100%; max-height: calc(100vh - 32px); overflow-y: auto; }
+      .edit-box h3 { margin: 0 0 4px; font-size: 1.08rem; }
+      .edit-box p.sub { margin: 0 0 14px; color: var(--ink-soft); font-size: 0.88rem; }
+      .edit-box .btn-row { justify-content: flex-end; margin-top: 4px; }
+      .edit-box textarea { font-family: inherit; font-size: 0.95rem; }
+      .new-link-box { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 0 0 14px; word-break: break-all; font-size: 0.85rem; }
 
       @media (max-width: 560px) {
         section.card { padding: 14px; }
@@ -215,6 +228,11 @@
           <input type="url" id="inViewerBase" placeholder="Dán địa chỉ trang xem tài khoản của thầy vào đây" autocomplete="off" spellcheck="false" />
           <span class="sub">Link share sẽ trỏ về địa chỉ này. Để trống thì chưa tạo được link share — điền sau cũng được, nhưng phải điền trước khi copy link gửi người dùng.</span>
         </div>
+        <div class="field">
+          <label for="inStreamUrl">Link video stream (hiện dưới trang xem tài khoản)</label>
+          <input type="url" id="inStreamUrl" placeholder="https://youtu.be/…" autocomplete="off" spellcheck="false" />
+          <span class="sub">Link YouTube hoặc Google Drive của video hướng dẫn — trang xem sẽ nhúng video này bên dưới thông tin tài khoản, và link được gắn sẵn vào mọi link share mới tạo. Để trống thì link share không gắn video riêng, trang xem dùng link mặc định của nó.</span>
+        </div>
         <div class="btn-row">
           <button class="btn primary" id="btnSaveSettings" type="button">Lưu cài đặt</button>
           <button class="btn" id="btnTestConn" type="button">Kiểm tra kết nối</button>
@@ -225,7 +243,7 @@
       <!-- ============ 2. NHẬP NHANH ============ -->
       <section class="card" id="sec-import">
         <h2><span class="step-num">2</span> Nhập nhanh tài khoản</h2>
-        <p class="hint">Mỗi dòng một tài khoản theo định dạng <code class="inline">email|pass|key 2fa</code>. Muốn đặt tên hiển thị, thêm thành phần thứ 4: <code class="inline">email|pass|key 2fa|Tên tài khoản</code>. Nếu không có tên, hệ thống tự lấy phần trước dấu @ của email.</p>
+        <p class="hint">Mỗi dòng một tài khoản theo định dạng <code class="inline">email|pass|key 2fa</code>. Muốn đặt tên hiển thị, thêm thành phần thứ 4: <code class="inline">email|pass|key 2fa|Tên tài khoản</code>. Nếu không ghi tên, hệ thống đặt tên mặc định là <b>Chat GPT Plus 1 tháng</b>. Tài khoản mới tự có hạn dùng 30 ngày kể từ ngày tạo — sửa lại được trong danh sách bên dưới.</p>
         <div class="field">
           <label for="inBulk">Dán danh sách tài khoản</label>
           <textarea id="inBulk" rows="6" placeholder="vd: nguyenvana@gmail.com|MatKhau123|JBSWY3DPEHPK3PXP&#10;tranb@gmail.com|Pass456|JBSWY3DPEHPK3PXP|Tài khoản học viên B" spellcheck="false"></textarea>
@@ -241,7 +259,7 @@
       <!-- ============ 3. DANH SÁCH ============ -->
       <section class="card" id="sec-list">
         <h2><span class="step-num">3</span> Tài khoản trên máy chủ</h2>
-        <p class="hint">Danh sách lấy trực tiếp từ máy chủ. Xoá một tài khoản là link share của nó hết hiệu lực ngay lập tức.</p>
+        <p class="hint">Danh sách lấy trực tiếp từ máy chủ. Bấm <b>Sửa</b> để chỉnh mọi thông tin của tài khoản (kể cả ghi chú và hạn dùng); bấm <b>Đổi link</b> để cấp link share mới — link cũ hết hiệu lực ngay. Xoá một tài khoản là link share của nó hết hiệu lực ngay lập tức.</p>
         <div class="toolbar">
           <button class="btn primary" id="btnLoadList" type="button">Tải danh sách</button>
           <div class="grow">
@@ -267,7 +285,9 @@
 
     <script>
       "use strict";
-      var LS_URL = "cs_script_url", LS_SECRET = "cs_admin_secret", LS_VIEWER = "cs_viewer_base";
+      var LS_URL = "cs_script_url", LS_SECRET = "cs_admin_secret", LS_VIEWER = "cs_viewer_base", LS_STREAM = "cs_stream_url";
+      var DEFAULT_NAME = "Chat GPT Plus 1 tháng";
+      var DEFAULT_STREAM = "https://youtu.be/GG_ec_hXAZI";
 
       function $(id) { return document.getElementById(id); }
       function esc(s) {
@@ -318,18 +338,24 @@
         var url = (storeGet(LS_URL) || "").trim();
         var secret = (storeGet(LS_SECRET) || "").trim();
         var viewer = (storeGet(LS_VIEWER) || "").trim();
+        var stream = (storeGet(LS_STREAM) || "").trim();
         if (!url) url = fieldVal("inScriptUrl");
         if (!secret) secret = fieldVal("inSecret");
         if (!viewer) viewer = fieldVal("inViewerBase");
-        return { url: url, secret: secret, viewer: viewer };
+        if (!stream) stream = fieldVal("inStreamUrl");
+        return { url: url, secret: secret, viewer: viewer, stream: stream };
       }
       function loadSettingsIntoForm() {
         var url = (storeGet(LS_URL) || "").trim();
         var secret = (storeGet(LS_SECRET) || "").trim();
         var viewer = (storeGet(LS_VIEWER) || "").trim();
+        var stream = storeGet(LS_STREAM);
         if (url) $("inScriptUrl").value = url;
         if (secret) $("inSecret").value = secret;
         if (viewer) $("inViewerBase").value = viewer;
+        // Link stream: chưa từng lưu thì điền sẵn link mặc định cho thầy thấy
+        // và sửa; đã lưu (kể cả lưu trống) thì tôn trọng đúng giá trị đã lưu.
+        $("inStreamUrl").value = (stream == null ? DEFAULT_STREAM : stream);
         var s = getSettings();
         $("setupGuide").hidden = !!(s.url && s.secret);
       }
@@ -337,6 +363,7 @@
         storeSet(LS_URL, fieldVal("inScriptUrl"));
         storeSet(LS_SECRET, fieldVal("inSecret"));
         storeSet(LS_VIEWER, fieldVal("inViewerBase"));
+        storeSet(LS_STREAM, fieldVal("inStreamUrl"));
         var s = getSettings();
         $("setupGuide").hidden = !!(s.url && s.secret);
         if (!silent) toast("Đã lưu cài đặt trên trình duyệt này");
@@ -406,7 +433,11 @@
         var s = getSettings();
         if (!s.viewer) return null;
         var base = s.viewer.split("#")[0];
-        return base + "#s=" + encodeURIComponent(id) + "&b=" + base64url(s.url);
+        var link = base + "#s=" + encodeURIComponent(id) + "&b=" + base64url(s.url);
+        // Gắn link video stream vào link share; để trống ô stream thì không
+        // thêm tham số v — trang xem tự dùng link mặc định của nó.
+        if (s.stream) link += "&v=" + base64url(s.stream);
+        return link;
       }
       function copyShareLink(id) {
         var link = buildShareLink(id);
@@ -477,10 +508,7 @@
           }
           row.email = parts[0]; row.pass = parts[1]; row.key = parts[2];
           row.name = parts.length >= 4 ? parts.slice(3).join("|").trim() : "";
-          if (!row.name) {
-            var at = row.email.indexOf("@");
-            row.name = at > 0 ? row.email.slice(0, at) : row.email;
-          }
+          if (!row.name) row.name = DEFAULT_NAME;
           var errs = [];
           if (row.email.indexOf("@") < 0) errs.push("Email không có dấu @.");
           if (!row.pass) errs.push("Mật khẩu trống.");
@@ -584,6 +612,26 @@
         if (isNaN(d.getTime())) return esc(String(v));
         return d.toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
       }
+      function fmtDay(v) {
+        if (!v) return "—";
+        var d = new Date(v);
+        if (isNaN(d.getTime())) return esc(String(v));
+        return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+      }
+      function expiryCell(a) {
+        if (!a.expiresAt) return '<span class="muted">—</span>';
+        var exp = new Date(a.expiresAt);
+        if (isNaN(exp.getTime())) return esc(String(a.expiresAt));
+        var now = new Date();
+        var startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        var startExp = new Date(exp.getFullYear(), exp.getMonth(), exp.getDate());
+        var days = Math.round((startExp - startToday) / 86400000);
+        var dateStr = fmtDay(a.expiresAt);
+        if (days < 0) return '<span class="exp exp-bad">Đã hết hạn<span class="exp-when">' + dateStr + " · quá " + (-days) + " ngày</span></span>";
+        if (days === 0) return '<span class="exp exp-bad">Hết hạn hôm nay<span class="exp-when">' + dateStr + "</span></span>";
+        if (days <= 3) return '<span class="exp exp-soon">Còn ' + days + ' ngày<span class="exp-when">đến ' + dateStr + "</span></span>";
+        return '<span class="exp">Còn ' + days + ' ngày<span class="exp-when">đến ' + dateStr + "</span></span>";
+      }
       function renderList() {
         var wrap = $("listWrap");
         var q = $("inSearch").value.trim().toLowerCase();
@@ -593,8 +641,8 @@
         });
         if (!serverAccounts.length) { wrap.innerHTML = ""; return; }
         if (!rows.length) { wrap.innerHTML = '<div class="empty-note">Không có tài khoản nào khớp với từ khoá tìm kiếm.</div>'; return; }
-        var html = '<div class="table-scroll"><table><thead><tr>' +
-          "<th>Tên</th><th>Email</th><th>Mật khẩu</th><th>Mã 2FA hiện tại</th><th>Ngày tạo</th><th>Thao tác</th>" +
+        var html = '<div class="table-scroll"><table class="list-table"><thead><tr>' +
+          "<th>Tên</th><th>Email</th><th>Mật khẩu</th><th>Mã 2FA hiện tại</th><th>Ghi chú</th><th>Hạn dùng</th><th>Ngày tạo</th><th>Thao tác</th>" +
           "</tr></thead><tbody>";
         rows.forEach(function (a) {
           var shown = a._showPw ? esc(a.pass || "") : '<span class="pw-mask">••••••••</span>';
@@ -602,15 +650,21 @@
           var code = a.code ? '<span class="code6">' + esc(a.code) + '</span>' : '<span class="muted">—</span>';
           var remain = (a.remain != null && a.code) ? ' <span class="remain">(còn ' + esc(a.remain) + ' giây)</span>' : "";
           var inactive = a.active === false ? ' <span class="remain">(đã tắt)</span>' : "";
+          var note = (a.note || "").trim();
+          var noteCell = note ? '<span title="' + esc(note) + '">' + esc(note) + "</span>" : '<span class="muted">—</span>';
           html += "<tr>" +
             "<td><b>" + esc(a.name || "") + "</b>" + inactive + "</td>" +
             "<td>" + esc(a.email || "") + "</td>" +
             '<td class="nowrap">' + shown + ' <button type="button" class="icon-btn" data-eye="' + esc(a.id) + '">' + eyeLabel + "</button></td>" +
             "<td>" + code + remain + "</td>" +
+            '<td class="cell-note">' + noteCell + "</td>" +
+            "<td>" + expiryCell(a) + "</td>" +
             "<td>" + fmtDate(a.createdAt) + "</td>" +
             '<td class="actions">' +
               '<button type="button" class="btn small" data-copy-link="' + esc(a.id) + '">Copy link</button>' +
               '<button type="button" class="btn small" data-open-link="' + esc(a.id) + '">Mở link</button>' +
+              '<button type="button" class="btn small" data-edit="' + esc(a.id) + '">Sửa</button>' +
+              '<button type="button" class="btn small" data-relink="' + esc(a.id) + '" data-relink-name="' + esc(a.name || a.email || "") + '">Đổi link</button>' +
               '<button type="button" class="btn small danger-outline" data-del="' + esc(a.id) + '" data-del-name="' + esc(a.name || a.email || "") + '">Xoá</button>' +
             "</td></tr>";
         });
@@ -664,6 +718,135 @@
         });
       }
 
+      /* ---------- Sửa tài khoản ---------- */
+      function pad2(n) { return (n < 10 ? "0" : "") + n; }
+      function toDateInputValue(v) {
+        if (!v) return "";
+        var d = new Date(v);
+        if (isNaN(d.getTime())) return "";
+        return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+      }
+      function openEditForm(acc) {
+        var root = $("confirmRoot");
+        var curKey = acc.key2fa || acc.key || "";
+        root.innerHTML =
+          '<div class="confirm-backdrop"><div class="edit-box" role="dialog" aria-modal="true" aria-label="Sửa tài khoản">' +
+          "<h3>Sửa tài khoản</h3>" +
+          '<p class="sub">Chỉnh mọi thông tin rồi bấm Lưu thay đổi. Mật khẩu và Key 2FA đang hiện giá trị hiện tại — xoá trắng ô nào thì máy chủ giữ nguyên giá trị cũ của ô đó.</p>' +
+          '<div class="field"><label for="edName">Tên tài khoản</label>' +
+          '<input type="text" id="edName" value="' + esc(acc.name || "") + '" autocomplete="off" /></div>' +
+          '<div class="field"><label for="edEmail">Email</label>' +
+          '<input type="text" id="edEmail" value="' + esc(acc.email || "") + '" autocomplete="off" spellcheck="false" /></div>' +
+          '<div class="field"><label for="edPass">Mật khẩu</label>' +
+          '<input type="text" id="edPass" value="' + esc(acc.pass || "") + '" autocomplete="off" spellcheck="false" /></div>' +
+          '<div class="field"><label for="edKey">Key 2FA</label>' +
+          '<input type="text" id="edKey" value="' + esc(curKey) + '" autocomplete="off" spellcheck="false" />' +
+          '<span class="sub">Chỉ gồm ký tự Base32 (A–Z, 2–7). Để trống = giữ nguyên key cũ.</span></div>' +
+          '<div class="field"><label for="edNote">Ghi chú</label>' +
+          '<textarea id="edNote" rows="3" placeholder="vd: Đã giao cho học viên A ngày…">' + esc(acc.note || "") + "</textarea></div>" +
+          '<div class="field"><label for="edExpires">Hạn dùng (ngày hết hạn)</label>' +
+          '<input type="date" id="edExpires" value="' + esc(toDateInputValue(acc.expiresAt)) + '" />' +
+          '<span class="sub">Hết hạn là link share báo đã hết hạn, người dùng không xem được tài khoản nữa.</span></div>' +
+          '<div class="status" id="edStatus" role="status" aria-live="polite"></div>' +
+          '<div class="btn-row"><button type="button" class="btn" id="edCancel">Huỷ</button>' +
+          '<button type="button" class="btn primary" id="edSave">Lưu thay đổi</button></div>' +
+          "</div></div>";
+        function close() { root.innerHTML = ""; }
+        $("edCancel").addEventListener("click", close);
+        root.firstElementChild.addEventListener("click", function (e) { if (e.target === this) close(); });
+        $("edName").focus();
+        $("edSave").addEventListener("click", function () {
+          var st = $("edStatus");
+          var name = $("edName").value.trim();
+          var email = $("edEmail").value.trim();
+          var pass = $("edPass").value;
+          var keyRaw = $("edKey").value;
+          var note = $("edNote").value;
+          var expiresAt = $("edExpires").value;
+          var errs = [];
+          if (email.indexOf("@") < 0) errs.push("Email không có dấu @.");
+          var key = "";
+          if (keyRaw.trim()) {
+            var keyNorm = keyRaw.replace(/[\s-]/g, "").toUpperCase();
+            if (!/^[A-Z2-7]+$/.test(keyNorm) || keyNorm.length < 8) {
+              errs.push("Key 2FA không hợp lệ — chỉ gồm ký tự Base32 (A–Z, 2–7) và dài tối thiểu 8 ký tự (để trống nếu muốn giữ key cũ).");
+            } else { key = keyNorm; }
+          }
+          if (errs.length) { st.className = "status err"; st.textContent = errs.join(" "); return; }
+          var s = needSecret(); if (!s) return;
+          $("edSave").disabled = true; $("edSave").textContent = "Đang lưu…";
+          st.className = "status"; st.textContent = "";
+          jsonp({
+            action: "edit", secret: s.secret,
+            data: JSON.stringify({
+              id: acc.id,
+              name: name || DEFAULT_NAME,
+              email: email,
+              pass: pass,
+              key: key,
+              note: note,
+              expiresAt: expiresAt
+            })
+          }).then(function (d) {
+            if (!d || !d.ok) throw new Error(apiError(d));
+            close();
+            toast("Đã lưu thay đổi cho tài khoản");
+            loadList(true);
+          }).catch(function (e) {
+            $("edSave").disabled = false; $("edSave").textContent = "Lưu thay đổi";
+            st.className = "status err";
+            st.textContent = "Lưu thất bại: " + e.message;
+          });
+        });
+      }
+
+      /* ---------- Đổi link share ---------- */
+      function confirmRelink(id, label) {
+        var root = $("confirmRoot");
+        root.innerHTML =
+          '<div class="confirm-backdrop"><div class="confirm-box" role="alertdialog" aria-modal="true">' +
+          "<h3>Đổi link share?</h3>" +
+          "<p>Cấp link share MỚI cho tài khoản <b>" + esc(label) + "</b>. <b>Link share cũ sẽ hết hiệu lực ngay lập tức</b> — người đang giữ link cũ sẽ không mở được nữa, thầy phải gửi link mới cho họ.</p>" +
+          '<div class="btn-row"><button type="button" class="btn" id="rlCancel">Huỷ</button>' +
+          '<button type="button" class="btn primary" id="rlOk">Đổi link mới</button></div>' +
+          "</div></div>";
+        function close() { root.innerHTML = ""; }
+        $("rlCancel").addEventListener("click", close);
+        root.firstElementChild.addEventListener("click", function (e) { if (e.target === this) close(); });
+        $("rlOk").addEventListener("click", function () {
+          var s = needSecret(); if (!s) { close(); return; }
+          $("rlOk").disabled = true; $("rlOk").textContent = "Đang đổi link…";
+          jsonp({ action: "relink", secret: s.secret, id: id }).then(function (d) {
+            if (!d || !d.ok || !d.id) throw new Error(apiError(d));
+            var newId = d.id;
+            serverAccounts.forEach(function (a) { if (String(a.id) === String(id)) a.id = newId; });
+            renderList();
+            showNewLink(newId, label);
+          }).catch(function (e) {
+            close();
+            toast("Đổi link thất bại: " + e.message, true);
+          });
+        });
+      }
+      function showNewLink(newId, label) {
+        var root = $("confirmRoot");
+        var link = buildShareLink(newId);
+        root.innerHTML =
+          '<div class="confirm-backdrop"><div class="confirm-box" role="dialog" aria-modal="true">' +
+          "<h3>Link share mới</h3>" +
+          "<p>Đã cấp link mới cho <b>" + esc(label) + "</b>. Link cũ đã hết hiệu lực. Gửi link dưới đây cho người dùng:</p>" +
+          (link
+            ? '<div class="new-link-box mono">' + esc(link) + "</div>"
+            : "<p>Chưa điền Địa chỉ trang xem tài khoản ở mục 1 nên chưa dựng được link đầy đủ. Điền xong, bấm Copy link ở dòng tài khoản trong danh sách là có link mới.</p>") +
+          '<div class="btn-row">' +
+          (link ? '<button type="button" class="btn primary" data-copy-link="' + esc(newId) + '">Copy link mới</button>' : "") +
+          '<button type="button" class="btn" id="nlClose">Đóng</button></div>' +
+          "</div></div>";
+        function close() { root.innerHTML = ""; }
+        $("nlClose").addEventListener("click", close);
+        root.firstElementChild.addEventListener("click", function (e) { if (e.target === this) close(); });
+      }
+
       /* ---------- Sự kiện dùng chung trong các bảng ---------- */
       document.addEventListener("click", function (e) {
         var t = e.target;
@@ -684,6 +867,14 @@
               if (acc) { acc._showPw = !acc._showPw; renderList(); }
               return;
             }
+            var ed = t.getAttribute("data-edit");
+            if (ed) {
+              var accE = serverAccounts.filter(function (a) { return String(a.id) === String(ed); })[0];
+              if (accE) openEditForm(accE);
+              return;
+            }
+            var rl = t.getAttribute("data-relink");
+            if (rl) { confirmRelink(rl, t.getAttribute("data-relink-name") || rl); return; }
             var del = t.getAttribute("data-del");
             if (del) { confirmDelete(del, t.getAttribute("data-del-name") || del); return; }
           }

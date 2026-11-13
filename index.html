@@ -31,6 +31,9 @@
         --danger-bg: #fdf0ef;
         --danger-border: #f2c9c5;
         --danger-ink: #8f2d24;
+        --warn-bg: #fdf6e0;
+        --warn-border: #eed9a0;
+        --warn-ink: #7a5b08;
         --btn-ghost: #f2f6f7;
         --btn-ghost-border: #d5dfe4;
         --shadow: 0 18px 44px rgba(18, 33, 43, .12), 0 2px 8px rgba(18, 33, 43, .06);
@@ -57,6 +60,9 @@
           --danger-bg: #3a1f1d;
           --danger-border: #6b3733;
           --danger-ink: #ffb4ab;
+          --warn-bg: #3a3114;
+          --warn-border: #6b5a26;
+          --warn-ink: #ffd97a;
           --btn-ghost: #1b2e38;
           --btn-ghost-border: #2e4550;
           --shadow: 0 18px 44px rgba(0, 0, 0, .45), 0 2px 8px rgba(0, 0, 0, .3);
@@ -244,6 +250,52 @@
       .btn-refresh:disabled { opacity: .55; cursor: wait; }
       .btn-refresh svg.spinning { animation: spin .7s linear infinite; }
 
+      /* ---------- Expiry ---------- */
+      .expiry-line {
+        margin: 0 24px 18px; padding: 10px 13px;
+        display: flex; align-items: center; gap: 8px;
+        background: var(--btn-ghost); border: 1px solid var(--line);
+        border-radius: 11px;
+        font-size: 13.5px; font-weight: 600; color: var(--ink-2); line-height: 1.45;
+      }
+      .expiry-line svg { flex: 0 0 auto; color: var(--ink-3); }
+      .expiry-line .days-left { color: var(--warn-ink); font-weight: 800; }
+      .expiry-line.warn {
+        background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-ink);
+      }
+      .expiry-line.warn svg { color: var(--warn-ink); }
+
+      /* ---------- Video ---------- */
+      .video-card { margin-top: 18px; padding: 20px 18px 18px; }
+      .video-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 0 2px; }
+      .video-icon {
+        flex: 0 0 auto; width: 38px; height: 38px; border-radius: 11px;
+        background: var(--accent-soft); color: var(--accent);
+        display: grid; place-items: center;
+      }
+      .video-head h2 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
+      .video-frame {
+        position: relative; width: 100%; aspect-ratio: 16 / 9;
+        border-radius: 12px; overflow: hidden;
+        background: #000;
+      }
+      .video-frame iframe {
+        position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block;
+      }
+      .video-fallback {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 12px; text-align: center; padding: 18px;
+        background: var(--otp-bg); color: var(--otp-ink);
+      }
+      .video-fallback p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--otp-sub); max-width: 320px; }
+      .btn-open-video {
+        display: inline-flex; align-items: center; gap: 8px;
+        min-height: 44px; padding: 11px 18px; border-radius: 11px; border: 0;
+        background: #ffffff; color: #0f2a2e;
+        font-size: 14.5px; font-weight: 700; text-decoration: none;
+      }
+
       .privacy-note {
         margin: 18px auto 0; max-width: 470px; width: 100%;
         display: flex; gap: 9px; align-items: flex-start;
@@ -269,6 +321,7 @@
       @media (max-width: 380px) {
         .otp-code { font-size: 36px; letter-spacing: .1em; }
         .acct-head, .rows { padding-left: 18px; padding-right: 18px; }
+        .expiry-line { margin-left: 18px; margin-right: 18px; }
         .otp { margin-left: 12px; margin-right: 12px; padding: 18px 16px 16px; }
       }
       @media (prefers-reduced-motion: reduce) {
@@ -383,6 +436,33 @@
             </button>
           </div>
         </div>
+
+        <p class="expiry-line hidden" id="expiry-line">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="expiry-text"></span>
+        </p>
+      </section>
+
+      <!-- Video -->
+      <section class="card video-card" id="view-video" aria-labelledby="video-title">
+        <div class="video-head">
+          <div class="video-icon" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h2 id="video-title">Xem video</h2>
+        </div>
+        <div class="video-frame">
+          <iframe id="video-iframe" class="hidden" title="Trình phát video" loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          <div class="video-fallback hidden" id="video-fallback">
+            <p>Chưa xem được video từ liên kết này.</p>
+            <a class="btn-open-video" id="video-open-link" href="#" target="_blank" rel="noopener noreferrer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Mở link gốc
+            </a>
+          </div>
+        </div>
       </section>
 
       <p class="privacy-note">
@@ -430,6 +510,11 @@
           copyCode: document.getElementById('copy-code'),
           btnRefresh: document.getElementById('btn-refresh'),
           refreshIcon: document.getElementById('refresh-icon'),
+          expiryLine: document.getElementById('expiry-line'),
+          expiryText: document.getElementById('expiry-text'),
+          videoIframe: document.getElementById('video-iframe'),
+          videoFallback: document.getElementById('video-fallback'),
+          videoOpenLink: document.getElementById('video-open-link'),
           toast: document.getElementById('toast'),
           toastText: document.getElementById('toast-text')
         };
@@ -460,11 +545,11 @@
           return atob(s);
         }
 
-        // Extract {s, b} from any string: full URL, hash fragment, or query string.
+        // Extract {s, b, v} from any string: full URL, hash fragment, or query string.
         function extractParams(str) {
           if (!str) return null;
           str = String(str).trim();
-          var s = null, b = null;
+          var s = null, b = null, v = null;
 
           function grab(text) {
             if (!text) return;
@@ -472,6 +557,7 @@
               var p = new URLSearchParams(text);
               if (!s && p.get('s')) s = p.get('s');
               if (!b && p.get('b')) b = p.get('b');
+              if (!v && p.get('v')) v = p.get('v');
             } catch (e) { /* ignore */ }
           }
 
@@ -484,20 +570,65 @@
             grab(str.slice(qIdx + 1, qEnd));
           }
           // Fallback: raw scan (handles links mangled by chat apps).
-          if (!s || !b) {
+          if (!s || !b || !v) {
             var ms = str.match(/[?&#]s=([^&#\s]+)/);
             var mb = str.match(/[?&#]b=([^&#\s]+)/);
+            var mv = str.match(/[?&#]v=([^&#\s]+)/);
             if (!s && ms) { try { s = decodeURIComponent(ms[1]); } catch (e) { s = ms[1]; } }
             if (!b && mb) { try { b = decodeURIComponent(mb[1]); } catch (e) { b = mb[1]; } }
+            if (!v && mv) { try { v = decodeURIComponent(mv[1]); } catch (e) { v = mv[1]; } }
           }
           if (!s || !b) return null;
-          return { s: s, b: b };
+          return { s: s, b: b, v: v };
         }
 
         function resolveApiUrl(b) {
           var url = decodeB(b);
           if (!/^https:\/\//i.test(url)) throw new Error('bad-url');
           return url;
+        }
+
+        /* ---------------- Video ---------------- */
+        var DEFAULT_VIDEO_URL = 'https://youtu.be/GG_ec_hXAZI';
+
+        // Convert a pasted Drive/YouTube link into an embeddable URL, or null.
+        function toEmbedUrl(raw) {
+          if (!raw) return null;
+          var url = String(raw).trim();
+          if (!/^https?:\/\//i.test(url)) return null;
+          var m;
+          // YouTube
+          m = url.match(/^https?:\/\/(?:www\.|m\.)?youtu\.be\/([A-Za-z0-9_-]{6,})/);
+          if (m) return 'https://www.youtube.com/embed/' + m[1];
+          m = url.match(/^https?:\/\/(?:www\.|m\.)?youtube\.com\/watch\?[^#]*\bv=([A-Za-z0-9_-]{6,})/);
+          if (m) return 'https://www.youtube.com/embed/' + m[1];
+          m = url.match(/^https?:\/\/(?:www\.|m\.)?youtube\.com\/shorts\/([A-Za-z0-9_-]{6,})/);
+          if (m) return 'https://www.youtube.com/embed/' + m[1];
+          m = url.match(/^https?:\/\/(?:www\.|m\.)?youtube\.com\/embed\/([A-Za-z0-9_-]{6,})/);
+          if (m) return 'https://www.youtube.com/embed/' + m[1];
+          // Google Drive
+          m = url.match(/^https?:\/\/drive\.google\.com\/file\/d\/([A-Za-z0-9_-]+)/);
+          if (m) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
+          if (/^https?:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/preview/.test(url)) return url;
+          return null;
+        }
+
+        // Show the video for a raw link; independent of the account fetch state.
+        function setupVideo(rawUrl) {
+          var original = rawUrl && String(rawUrl).trim() ? String(rawUrl).trim() : DEFAULT_VIDEO_URL;
+          var embed = toEmbedUrl(original);
+          if (embed) {
+            els.videoFallback.classList.add('hidden');
+            if (els.videoIframe.getAttribute('src') !== embed) {
+              els.videoIframe.src = embed;
+            }
+            els.videoIframe.classList.remove('hidden');
+          } else {
+            els.videoIframe.classList.add('hidden');
+            els.videoIframe.removeAttribute('src');
+            els.videoOpenLink.href = original;
+            els.videoFallback.classList.remove('hidden');
+          }
         }
 
         /* ---------------- JSONP ---------------- */
@@ -558,7 +689,8 @@
               name: res.name ? String(res.name) : 'Tài khoản',
               email: res.email ? String(res.email) : '',
               pass: res.pass != null ? String(res.pass) : '',
-              code: res.code != null ? String(res.code).replace(/\s+/g, '') : ''
+              code: res.code != null ? String(res.code).replace(/\s+/g, '') : '',
+              expiresAt: res.expiresAt != null ? String(res.expiresAt) : ''
             };
             var remain = parseInt(res.remain, 10);
             if (isNaN(remain) || remain < 1) remain = 30;
@@ -603,7 +735,31 @@
           els.email.textContent = d.email || '—';
           els.pass.textContent = state.passVisible ? d.pass : maskedPass(d.pass);
           els.code.textContent = formatCode(d.code);
+          renderExpiry(d.expiresAt);
           updateRing();
+        }
+        function renderExpiry(expiresAt) {
+          if (!expiresAt) { els.expiryLine.classList.add('hidden'); return; }
+          var exp = new Date(expiresAt);
+          if (isNaN(exp.getTime())) { els.expiryLine.classList.add('hidden'); return; }
+          function pad(n) { return (n < 10 ? '0' : '') + n; }
+          var dateStr = pad(exp.getDate()) + '/' + pad(exp.getMonth() + 1) + '/' + exp.getFullYear();
+          var now = new Date();
+          var startOfDay = function (dt) { return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime(); };
+          var daysLeft = Math.round((startOfDay(exp) - startOfDay(now)) / 86400000);
+          els.expiryText.textContent = '';
+          els.expiryText.appendChild(document.createTextNode('Hạn dùng đến: ' + dateStr));
+          var warn = daysLeft < 3;
+          if (warn) {
+            var span = document.createElement('span');
+            span.className = 'days-left';
+            span.textContent = daysLeft > 0
+              ? ' — còn ' + daysLeft + ' ngày'
+              : (daysLeft === 0 ? ' — hết hạn hôm nay' : ' — đã hết hạn');
+            els.expiryText.appendChild(span);
+          }
+          els.expiryLine.classList.toggle('warn', warn);
+          els.expiryLine.classList.remove('hidden');
         }
         function updateRing() {
           var frac = state.remainMax > 0 ? state.remain / state.remainMax : 0;
@@ -702,9 +858,16 @@
             return false;
           }
           state.token = params.s;
+          var videoUrl = null;
+          if (params.v) {
+            try { videoUrl = decodeB(params.v); } catch (e) { videoUrl = null; }
+          }
+          setupVideo(videoUrl);
           if (updateHash) {
             try {
-              history.replaceState(null, '', '#s=' + encodeURIComponent(params.s) + '&b=' + encodeURIComponent(params.b));
+              var hash = '#s=' + encodeURIComponent(params.s) + '&b=' + encodeURIComponent(params.b);
+              if (params.v) hash += '&v=' + encodeURIComponent(params.v);
+              history.replaceState(null, '', hash);
             } catch (e) { /* ignore */ }
           }
           fetchAccount(true);
@@ -748,6 +911,7 @@
         });
 
         /* ---------------- Boot ---------------- */
+        setupVideo(null); // default stream link; replaced below if the link carries &v=
         var initial = extractParams(window.location.hash || '') || extractParams(window.location.search || '');
         if (initial) {
           if (!startWithParams(initial, false)) {
