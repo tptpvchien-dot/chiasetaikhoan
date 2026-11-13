@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Quản trị tài khoản chia sẻ</title>
+    <style>
+      :root {
+        --bg: #f4f6f8;
+        --surface: #ffffff;
+        --surface-2: #eef2f5;
+        --ink: #16212b;
+        --ink-soft: #4c5d6b;
+        --line: #d6dee5;
+        --accent: #0f766e;
+        --accent-ink: #ffffff;
+        --accent-soft: #d9f0ec;
+        --warn-bg: #fdf3e3;
+        --warn-line: #e8c88a;
+        --warn-ink: #7a5410;
+        --err-bg: #fdecea;
+        --err-line: #f0b3ad;
+        --err-ink: #9c2b21;
+        --ok: #157347;
+        --danger: #b3261e;
+        --code-bg: #eef2f5;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #10171d;
+          --surface: #18222b;
+          --surface-2: #1f2c38;
+          --ink: #e8eef3;
+          --ink-soft: #9db0bf;
+          --line: #33424f;
+          --accent: #2dd4bf;
+          --accent-ink: #062e29;
+          --accent-soft: #123f39;
+          --warn-bg: #3a2f14;
+          --warn-line: #7a6224;
+          --warn-ink: #f0d48a;
+          --err-bg: #3d1e1a;
+          --err-line: #8a453d;
+          --err-ink: #f2b8b1;
+          --ok: #5fce92;
+          --danger: #ff8a80;
+          --code-bg: #1f2c38;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.5;
+      }
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.5rem; }
+      button { cursor: pointer; font: inherit; }
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 16px 14px 48px; }
+      header.top { padding: 8px 2px 4px; }
+      header.top h1 { font-size: 1.55rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.01em; }
+      header.top p { margin: 0; color: var(--ink-soft); font-size: 0.95rem; max-width: 62ch; }
+
+      section.card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px;
+        margin-top: 18px;
+      }
+      section.card > h2 {
+        font-size: 1.12rem; margin: 0 0 4px;
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      }
+      section.card > p.hint { color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 12px; }
+      .step-num {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 26px; height: 26px; border-radius: 50%;
+        background: var(--accent); color: var(--accent-ink);
+        font-size: 0.85rem; font-weight: 700; flex: none;
+      }
+
+      .field { margin: 0 0 14px; }
+      .field label { display: block; font-weight: 600; font-size: 0.92rem; margin-bottom: 5px; }
+      .field .sub { display: block; font-weight: 400; color: var(--ink-soft); font-size: 0.84rem; margin-top: 3px; }
+      input[type="text"], input[type="password"], input[type="url"], input[type="search"], textarea, select {
+        width: 100%; padding: 9px 11px; font: inherit; color: var(--ink);
+        background: var(--surface); border: 1px solid var(--line); border-radius: 9px;
+      }
+      textarea { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.9rem; resize: vertical; }
+      input:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+      .btn-row { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+      .btn {
+        border: 1px solid var(--line); background: var(--surface-2); color: var(--ink);
+        border-radius: 9px; padding: 8px 16px; font-weight: 600; font-size: 0.93rem;
+        display: inline-flex; align-items: center; gap: 6px;
+      }
+      .btn:hover { filter: brightness(1.04); }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+      .btn.danger-outline { color: var(--danger); border-color: var(--err-line); background: transparent; }
+      .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+      .btn.small { min-height: 2.25rem; padding: 4px 10px; font-size: 0.85rem; border-radius: 8px; }
+
+      .status { font-size: 0.9rem; margin-top: 10px; min-height: 1.3em; }
+      .status.ok { color: var(--ok); }
+      .status.err { color: var(--danger); }
+      .muted { color: var(--ink-soft); font-size: 0.88rem; }
+
+      .guide {
+        background: var(--accent-soft); border-radius: 10px; padding: 13px 15px; margin-bottom: 16px;
+        font-size: 0.93rem;
+      }
+      .guide strong { display: block; margin-bottom: 5px; }
+      .guide ol { margin: 0; padding-left: 20px; }
+      .guide li { margin: 2px 0; }
+
+      .safety {
+        background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn-ink);
+        border-radius: 10px; padding: 13px 15px; font-size: 0.92rem; margin-top: 18px;
+      }
+      .safety strong { display: block; margin-bottom: 4px; }
+      .safety ul { margin: 0; padding-left: 20px; }
+      .safety li { margin: 2px 0; }
+
+      code, .mono { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+      code.inline { background: var(--code-bg); padding: 1px 6px; border-radius: 6px; font-size: 0.88em; word-break: break-all; }
+
+      .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin-top: 12px; }
+      table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 640px; }
+      th, td { text-align: left; padding: 9px 11px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { background: var(--surface-2); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); white-space: nowrap; }
+      tr:last-child td { border-bottom: none; }
+      tr.row-bad td { background: var(--err-bg); }
+      .cell-err { color: var(--err-ink); font-size: 0.83rem; margin-top: 3px; }
+      .cell-link { word-break: break-all; font-size: 0.82rem; }
+      .pw-mask { letter-spacing: 0.12em; }
+      .code6 { font-family: ui-monospace, Consolas, monospace; font-weight: 700; font-size: 1.02rem; letter-spacing: 0.14em; white-space: nowrap; }
+      .remain { color: var(--ink-soft); font-size: 0.8rem; white-space: nowrap; }
+      td.actions, td.nowrap { white-space: nowrap; }
+      td.actions .btn { margin: 0 4px 4px 0; }
+      .icon-btn {
+        border: 1px solid transparent; background: transparent; color: var(--ink-soft);
+        border-radius: 7px; padding: 3px 8px; min-height: 2.25rem; font-size: 0.85rem; font-weight: 600;
+      }
+      .icon-btn:hover { background: var(--surface-2); color: var(--ink); }
+
+      .toolbar { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+      .toolbar .grow { flex: 1 1 220px; }
+      .progress { font-weight: 600; font-size: 0.92rem; }
+      .empty-note { padding: 16px; color: var(--ink-soft); font-size: 0.92rem; }
+
+      #toasts { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column; gap: 8px; align-items: center; width: min(92vw, 440px); }
+      .toast {
+        background: var(--ink); color: var(--bg); border-radius: 10px; padding: 10px 16px;
+        font-size: 0.92rem; font-weight: 600; text-align: center; box-shadow: 0 6px 22px rgba(0,0,0,0.28);
+        animation: toast-in 0.18s ease-out;
+      }
+      .toast.err { background: var(--danger); color: #fff; }
+      @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+      @media (prefers-reduced-motion: reduce) { .toast { animation: none; } }
+
+      .confirm-backdrop {
+        position: fixed; inset: 0; background: rgba(10, 18, 24, 0.55); z-index: 50;
+        display: flex; align-items: center; justify-content: center; padding: 16px;
+      }
+      .confirm-box { background: var(--surface); border-radius: 14px; padding: 20px; max-width: 420px; width: 100%; }
+      .confirm-box h3 { margin: 0 0 8px; font-size: 1.05rem; }
+      .confirm-box p { margin: 0 0 16px; color: var(--ink-soft); font-size: 0.93rem; }
+      .confirm-box .btn-row { justify-content: flex-end; }
+      .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+      @media (max-width: 560px) {
+        section.card { padding: 14px; }
+        header.top h1 { font-size: 1.35rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <h1>Quản trị tài khoản chia sẻ</h1>
+        <p>Trang dành riêng cho chủ tài khoản: nhập tài khoản lên máy chủ của thầy, tạo link share gửi cho người dùng. Người dùng chỉ thấy trang xem tài khoản — không thấy được key 2FA, cũng không lần ra được trang này.</p>
+      </header>
+
+      <!-- ============ 1. CÀI ĐẶT ============ -->
+      <section class="card" id="sec-settings">
+        <h2><span class="step-num">1</span> Kết nối máy chủ (Apps Script)</h2>
+        <p class="hint">Máy chủ là Web App Apps Script trên chính tài khoản Google của thầy — nơi giữ key 2FA và tự tính mã dùng 1 lần. Cài đặt chỉ lưu trên trình duyệt này.</p>
+
+        <div class="guide" id="setupGuide" hidden>
+          <strong>Chưa cài đặt — làm 3 bước sau:</strong>
+          <ol>
+            <li>Triển khai file Apps Script máy chủ (em đã soạn sẵn) và sao chép <b>địa chỉ Web App</b> của nó.</li>
+            <li>Dán địa chỉ đó vào ô bên dưới, nhập <b>mã bí mật quản trị</b> đã đặt trong file Apps Script.</li>
+            <li>Bấm <b>Lưu cài đặt</b> rồi <b>Kiểm tra kết nối</b> để chắc chắn máy chủ trả lời đúng.</li>
+          </ol>
+        </div>
+
+        <div class="field">
+          <label for="inScriptUrl">Địa chỉ Web App Apps Script</label>
+          <input type="url" id="inScriptUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label for="inSecret">Mã bí mật quản trị</label>
+          <input type="password" id="inSecret" placeholder="Mã bí mật đã đặt trong file Apps Script" autocomplete="off" />
+          <span class="sub">Mã này chỉ dùng để trang quản trị gọi máy chủ. Tuyệt đối không gửi mã này cho người dùng.</span>
+        </div>
+        <div class="field">
+          <label for="inViewerBase">Địa chỉ trang xem tài khoản (trang người dùng)</label>
+          <input type="url" id="inViewerBase" placeholder="Dán địa chỉ trang xem tài khoản của thầy vào đây" autocomplete="off" spellcheck="false" />
+          <span class="sub">Link share sẽ trỏ về địa chỉ này. Để trống thì chưa tạo được link share — điền sau cũng được, nhưng phải điền trước khi copy link gửi người dùng.</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="btnSaveSettings" type="button">Lưu cài đặt</button>
+          <button class="btn" id="btnTestConn" type="button">Kiểm tra kết nối</button>
+        </div>
+        <div class="status" id="connStatus" role="status" aria-live="polite"></div>
+      </section>
+
+      <!-- ============ 2. NHẬP NHANH ============ -->
+      <section class="card" id="sec-import">
+        <h2><span class="step-num">2</span> Nhập nhanh tài khoản</h2>
+        <p class="hint">Mỗi dòng một tài khoản theo định dạng <code class="inline">email|pass|key 2fa</code>. Muốn đặt tên hiển thị, thêm thành phần thứ 4: <code class="inline">email|pass|key 2fa|Tên tài khoản</code>. Nếu không có tên, hệ thống tự lấy phần trước dấu @ của email.</p>
+        <div class="field">
+          <label for="inBulk">Dán danh sách tài khoản</label>
+          <textarea id="inBulk" rows="6" placeholder="vd: nguyenvana@gmail.com|MatKhau123|JBSWY3DPEHPK3PXP&#10;tranb@gmail.com|Pass456|JBSWY3DPEHPK3PXP|Tài khoản học viên B" spellcheck="false"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="btnCheck" type="button">Kiểm tra</button>
+          <button class="btn primary" id="btnImport" type="button" disabled>Nhập lên hệ thống</button>
+          <span class="progress" id="importProgress" aria-live="polite"></span>
+        </div>
+        <div id="previewWrap"></div>
+      </section>
+
+      <!-- ============ 3. DANH SÁCH ============ -->
+      <section class="card" id="sec-list">
+        <h2><span class="step-num">3</span> Tài khoản trên máy chủ</h2>
+        <p class="hint">Danh sách lấy trực tiếp từ máy chủ. Xoá một tài khoản là link share của nó hết hiệu lực ngay lập tức.</p>
+        <div class="toolbar">
+          <button class="btn primary" id="btnLoadList" type="button">Tải danh sách</button>
+          <div class="grow">
+            <input type="search" id="inSearch" placeholder="Tìm theo tên hoặc email…" aria-label="Tìm theo tên hoặc email" />
+          </div>
+        </div>
+        <div class="status" id="listStatus" role="status" aria-live="polite"></div>
+        <div id="listWrap"></div>
+      </section>
+
+      <div class="safety">
+        <strong>Lưu ý an toàn</strong>
+        <ul>
+          <li>Không chia sẻ địa chỉ trang quản trị này và mã bí mật quản trị cho người dùng — ai có mã bí mật là xem được toàn bộ tài khoản và key 2FA.</li>
+          <li>Link share chỉ gửi cho đúng người nhận; ai có link là xem được email, mật khẩu và mã dùng 1 lần của tài khoản đó.</li>
+          <li>Khi không cần chia sẻ nữa, bấm <b>Xoá</b> trong danh sách để thu hồi — link share sẽ chết ngay.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="toasts" aria-live="polite"></div>
+    <div id="confirmRoot"></div>
+
+    <script>
+      "use strict";
+      var LS_URL = "cs_script_url", LS_SECRET = "cs_admin_secret", LS_VIEWER = "cs_viewer_base";
+
+      function $(id) { return document.getElementById(id); }
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+      }
+      function toast(msg, isErr) {
+        var t = document.createElement("div");
+        t.className = "toast" + (isErr ? " err" : "");
+        t.textContent = msg;
+        $("toasts").appendChild(t);
+        setTimeout(function () { t.remove(); }, 3400);
+      }
+      function copyText(text, okMsg) {
+        function done() { toast(okMsg || "Đã copy"); }
+        function fail() { toast("Không copy được — hãy bôi đen và copy thủ công", true); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, function () { legacy(); });
+        } else { legacy(); }
+        function legacy() {
+          try {
+            var ta = document.createElement("textarea");
+            ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+            document.body.appendChild(ta); ta.select();
+            var ok = document.execCommand("copy");
+            ta.remove();
+            ok ? done() : fail();
+          } catch (e) { fail(); }
+        }
+      }
+
+      /* ---------- Cài đặt ---------- */
+      /* Bộ nhớ chịu lỗi: nếu trình duyệt/webview chặn hoặc xoá localStorage
+         thì dùng bộ nhớ tạm trong phiên, và luôn dự phòng bằng giá trị đang
+         có trên form — để các thao tác không bao giờ chết lặng vì mất cài đặt. */
+      var memStore = {};
+      function storeGet(k) {
+        try { var v = localStorage.getItem(k); if (v != null) return v; } catch (e) {}
+        return Object.prototype.hasOwnProperty.call(memStore, k) ? memStore[k] : null;
+      }
+      function storeSet(k, v) {
+        memStore[k] = v;
+        try { localStorage.setItem(k, v); } catch (e) {}
+      }
+      function fieldVal(id) { var el = $(id); return el ? el.value.trim() : ""; }
+      function getSettings() {
+        var url = (storeGet(LS_URL) || "").trim();
+        var secret = (storeGet(LS_SECRET) || "").trim();
+        var viewer = (storeGet(LS_VIEWER) || "").trim();
+        if (!url) url = fieldVal("inScriptUrl");
+        if (!secret) secret = fieldVal("inSecret");
+        if (!viewer) viewer = fieldVal("inViewerBase");
+        return { url: url, secret: secret, viewer: viewer };
+      }
+      function loadSettingsIntoForm() {
+        var url = (storeGet(LS_URL) || "").trim();
+        var secret = (storeGet(LS_SECRET) || "").trim();
+        var viewer = (storeGet(LS_VIEWER) || "").trim();
+        if (url) $("inScriptUrl").value = url;
+        if (secret) $("inSecret").value = secret;
+        if (viewer) $("inViewerBase").value = viewer;
+        var s = getSettings();
+        $("setupGuide").hidden = !!(s.url && s.secret);
+      }
+      function saveSettings(silent) {
+        storeSet(LS_URL, fieldVal("inScriptUrl"));
+        storeSet(LS_SECRET, fieldVal("inSecret"));
+        storeSet(LS_VIEWER, fieldVal("inViewerBase"));
+        var s = getSettings();
+        $("setupGuide").hidden = !!(s.url && s.secret);
+        if (!silent) toast("Đã lưu cài đặt trên trình duyệt này");
+      }
+      function looksLikeExecUrl(u) {
+        return /^https:\/\/script\.google\.com\/macros\/s\/[^/\s]+\/exec\/?$/.test(String(u || "").trim());
+      }
+
+      /* ---------- JSONP gọi Apps Script ---------- */
+      var jsonpSeq = 0;
+      function jsonp(params) {
+        return new Promise(function (resolve, reject) {
+          var s = getSettings();
+          var url = String(s.url || "").replace(/\s+/g, "");
+          if (!url) { reject(new Error("Chưa điền Địa chỉ Web App Apps Script ở mục 1.")); return; }
+          var cbName = "__cs_cb_" + Date.now() + "_" + (++jsonpSeq);
+          var qs = [];
+          Object.keys(params).forEach(function (k) { qs.push(encodeURIComponent(k) + "=" + encodeURIComponent(params[k])); });
+          qs.push("callback=" + cbName);
+          qs.push("_t=" + Date.now());
+          var script = document.createElement("script");
+          var settled = false;
+          var timer = setTimeout(function () {
+            finish(new Error("Máy chủ không trả lời sau 20 giây. Thường do một trong ba nguyên nhân: (1) Web App chưa Deploy, hoặc đã sửa mã Apps Script mà chưa Deploy lại phiên bản mới (Deploy → Manage deployments → chọn bản triển khai → New version); (2) mục Who has access chưa để Anyone; (3) địa chỉ dán vào chưa phải địa chỉ Web App (phải kết thúc bằng /exec)."));
+          }, 20000);
+          function cleanup() {
+            clearTimeout(timer);
+            try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+            if (script.parentNode) script.parentNode.removeChild(script);
+          }
+          function finish(err, data) {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            if (err) reject(err); else resolve(data);
+          }
+          window[cbName] = function (data) { finish(null, data); };
+          script.onerror = function () {
+            finish(new Error("Không gọi được máy chủ. Kiểm tra lại địa chỉ Web App (phải là địa chỉ của bản triển khai, kết thúc bằng /exec) và kết nối mạng."));
+          };
+          script.onload = function () {
+            // Tải xong mà callback không được gọi: máy chủ đã trả về một trang HTML
+            // (trang đăng nhập Google hoặc trang lỗi) thay vì dữ liệu JSONP.
+            setTimeout(function () {
+              finish(new Error("Máy chủ trả về trang đăng nhập/lỗi của Google thay vì dữ liệu. Hãy kiểm tra trong Apps Script: Web App đã Deploy chưa; mục Who has access đã để Anyone chưa; và sau mỗi lần sửa mã phải Deploy lại phiên bản mới (Deploy → Manage deployments → New version) thì địa chỉ /exec mới chạy mã mới."));
+            }, 60);
+          };
+          script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + qs.join("&");
+          document.head.appendChild(script);
+        });
+      }
+      function needSecret() {
+        var s = getSettings();
+        if (!s.url) { toast("Chưa điền Địa chỉ Web App Apps Script ở mục 1", true); return null; }
+        if (!s.secret) { toast("Chưa nhập Mã bí mật quản trị ở mục 1", true); return null; }
+        return s;
+      }
+      function apiError(data) {
+        return (data && data.error) ? String(data.error) : "Máy chủ trả về lỗi không rõ.";
+      }
+
+      /* ---------- Link share ---------- */
+      function base64url(str) {
+        return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      }
+      function buildShareLink(id) {
+        var s = getSettings();
+        if (!s.viewer) return null;
+        var base = s.viewer.split("#")[0];
+        return base + "#s=" + encodeURIComponent(id) + "&b=" + base64url(s.url);
+      }
+      function copyShareLink(id) {
+        var link = buildShareLink(id);
+        if (!link) {
+          toast("Cần điền Địa chỉ trang xem tài khoản ở mục 1 trước khi tạo link share", true);
+          $("inViewerBase").focus();
+          return;
+        }
+        copyText(link, "Đã copy link share");
+      }
+
+      /* ---------- Kiểm tra kết nối ---------- */
+      function runConnectionCheck(manual) {
+        saveSettings(true);
+        var st = $("connStatus");
+        var s = getSettings();
+        if (!s.url) { st.className = "status err"; st.textContent = "Chưa điền Địa chỉ Web App Apps Script."; return Promise.resolve(false); }
+        st.className = "status"; st.textContent = "Đang kiểm tra kết nối…";
+        $("btnTestConn").disabled = true;
+        return jsonp({ action: "ping" }).then(function (d) {
+          if (!d || !d.ok) throw new Error(apiError(d));
+          if (!s.secret) {
+            st.className = "status ok";
+            st.textContent = "Máy chủ trả lời tốt (ping OK). Nhập thêm Mã bí mật quản trị để dùng đầy đủ chức năng.";
+            return false;
+          }
+          return jsonp({ action: "adminPing", secret: s.secret }).then(function (d2) {
+            if (!d2 || !d2.ok) throw new Error(apiError(d2));
+            st.className = "status ok";
+            st.textContent = "Kết nối thành công: máy chủ trả lời tốt và mã bí mật quản trị đúng.";
+            if (manual) toast("Kết nối máy chủ thành công");
+            return true;
+          });
+        }).catch(function (e) {
+          st.className = "status err";
+          st.textContent = "Kiểm tra thất bại: " + e.message;
+          return false;
+        }).then(function (ok) { $("btnTestConn").disabled = false; return ok; });
+      }
+      $("btnSaveSettings").addEventListener("click", function () {
+        saveSettings(false);
+        var s = getSettings();
+        var st = $("connStatus");
+        if (s.url && !looksLikeExecUrl(s.url)) {
+          st.className = "status err";
+          st.textContent = "Lưu ý: địa chỉ vừa lưu không giống địa chỉ Web App chuẩn — địa chỉ đúng phải có dạng https://script.google.com/macros/s/…/exec (lấy ở Apps Script: Deploy → Manage deployments). Nếu đây là địa chỉ trang soạn thảo script hoặc liên kết bản nháp /dev thì mọi thao tác bên dưới sẽ không gọi được máy chủ.";
+        } else if (s.url) {
+          st.className = "status";
+          st.textContent = "Đã lưu cài đặt. Bấm Kiểm tra kết nối để chắc chắn máy chủ trả lời.";
+        }
+      });
+      $("btnTestConn").addEventListener("click", function () { runConnectionCheck(true); });
+
+      /* ---------- Nhập nhanh: phân tích & xem trước ---------- */
+      var parsedRows = []; // {line, name, email, pass, key, ok, error}
+      function parseBulk() {
+        var raw = $("inBulk").value.split(/\r?\n/);
+        var rows = [];
+        raw.forEach(function (line, idx) {
+          var t = line.trim();
+          if (!t) return;
+          var parts = t.split("|").map(function (p) { return p.trim(); });
+          var row = { line: idx + 1, name: "", email: "", pass: "", key: "", ok: true, error: "" };
+          if (parts.length < 3) {
+            row.ok = false; row.error = "Thiếu thành phần — cần đúng định dạng email|pass|key 2fa.";
+            row.email = parts[0] || ""; row.pass = parts[1] || ""; row.key = parts[2] || "";
+            rows.push(row); return;
+          }
+          row.email = parts[0]; row.pass = parts[1]; row.key = parts[2];
+          row.name = parts.length >= 4 ? parts.slice(3).join("|").trim() : "";
+          if (!row.name) {
+            var at = row.email.indexOf("@");
+            row.name = at > 0 ? row.email.slice(0, at) : row.email;
+          }
+          var errs = [];
+          if (row.email.indexOf("@") < 0) errs.push("Email không có dấu @.");
+          if (!row.pass) errs.push("Mật khẩu trống.");
+          var keyNorm = row.key.replace(/[\s-]/g, "").toUpperCase();
+          if (!/^[A-Z2-7]+$/.test(keyNorm) || keyNorm.length < 8) {
+            errs.push("Key 2FA không hợp lệ — chỉ gồm ký tự Base32 (A–Z, 2–7) và dài tối thiểu 8 ký tự.");
+          } else {
+            row.key = keyNorm;
+          }
+          if (errs.length) { row.ok = false; row.error = errs.join(" "); }
+          rows.push(row);
+        });
+        return rows;
+      }
+      function renderPreview() {
+        var wrap = $("previewWrap");
+        if (!parsedRows.length) { wrap.innerHTML = ""; $("btnImport").disabled = true; return; }
+        var validCount = parsedRows.filter(function (r) { return r.ok; }).length;
+        var html = '<p class="muted" style="margin-top:12px">Xem trước: <b>' + validCount + "/" + parsedRows.length +
+          '</b> dòng hợp lệ. Chỉ những dòng hợp lệ mới được nhập lên hệ thống.</p>';
+        html += '<div class="table-scroll"><table><thead><tr>' +
+          "<th>Dòng</th><th>Tên tài khoản</th><th>Email</th><th>Mật khẩu</th><th>Key 2FA</th><th>Link share</th>" +
+          "</tr></thead><tbody>";
+        parsedRows.forEach(function (r, i) {
+          html += '<tr class="' + (r.ok ? "" : "row-bad") + '">' +
+            "<td>" + r.line + "</td>" +
+            "<td>" + esc(r.name) + "</td>" +
+            "<td>" + esc(r.email) + "</td>" +
+            "<td>" + esc(r.pass) + "</td>" +
+            '<td class="mono">' + esc(r.key) + "</td>" +
+            '<td id="pvLink' + i + '">' + (r.ok ? '<span class="muted">Sẽ hiện sau khi nhập</span>' : '<span class="muted">—</span>') +
+            (r.ok ? "" : '<div class="cell-err">' + esc(r.error) + "</div>") + "</td></tr>";
+        });
+        html += "</tbody></table></div>";
+        wrap.innerHTML = html;
+        $("btnImport").disabled = validCount === 0;
+      }
+      $("btnCheck").addEventListener("click", function () {
+        parsedRows = parseBulk();
+        if (!parsedRows.length) { toast("Chưa có dòng nào để kiểm tra — hãy dán danh sách tài khoản trước", true); renderPreview(); return; }
+        renderPreview();
+        var bad = parsedRows.filter(function (r) { return !r.ok; }).length;
+        if (bad) toast("Có " + bad + " dòng lỗi — xem ghi chú đỏ trong bảng", true);
+        else toast("Tất cả " + parsedRows.length + " dòng đều hợp lệ");
+      });
+
+      /* ---------- Nhập lên hệ thống (tuần tự) ---------- */
+      $("btnImport").addEventListener("click", function () {
+        saveSettings(true);
+        var s = needSecret(); if (!s) return;
+        var valid = parsedRows.map(function (r, i) { return { r: r, i: i }; }).filter(function (x) { return x.r.ok && !x.r.doneId; });
+        if (!valid.length) { toast("Không còn dòng hợp lệ nào chưa nhập", true); return; }
+        $("btnImport").disabled = true; $("btnCheck").disabled = true;
+        var total = valid.length, done = 0, failed = 0;
+        function step(k) {
+          if (k >= valid.length) {
+            $("importProgress").textContent = "Hoàn tất: nhập thành công " + (done - failed) + "/" + total + " tài khoản.";
+            $("btnCheck").disabled = false;
+            renderPreviewStates();
+            if (failed === 0) toast("Đã nhập xong " + total + " tài khoản lên hệ thống");
+            else toast("Nhập xong nhưng có " + failed + " tài khoản lỗi — xem ghi chú trong bảng", true);
+            loadList(true);
+            return;
+          }
+          var item = valid[k];
+          $("importProgress").textContent = "Đang nhập " + (k + 1) + "/" + total + "…";
+          jsonp({
+            action: "add", secret: s.secret,
+            data: JSON.stringify({ email: item.r.email, pass: item.r.pass, key: item.r.key, name: item.r.name })
+          }).then(function (d) {
+            done++;
+            if (d && d.ok && d.id) {
+              item.r.doneId = d.id;
+              var cell = $("pvLink" + item.i);
+              if (cell) {
+                var link = buildShareLink(d.id);
+                cell.innerHTML = link
+                  ? '<div class="cell-link mono">' + esc(link) + '</div><button type="button" class="btn small" data-copy-link="' + esc(d.id) + '">Copy link</button>'
+                  : '<span class="muted">Đã nhập (mã: ' + esc(d.id) + '). Điền Địa chỉ trang xem ở mục 1 để có link share.</span> <button type="button" class="btn small" data-copy-link="' + esc(d.id) + '">Copy link</button>';
+              }
+            } else {
+              failed++;
+              var cell2 = $("pvLink" + item.i);
+              if (cell2) cell2.innerHTML = '<div class="cell-err">Lỗi từ máy chủ: ' + esc(apiError(d)) + "</div>";
+            }
+          }).catch(function (e) {
+            done++; failed++;
+            var cell = $("pvLink" + item.i);
+            if (cell) cell.innerHTML = '<div class="cell-err">Lỗi: ' + esc(e.message) + "</div>";
+          }).then(function () { step(k + 1); });
+        }
+        function renderPreviewStates() { $("btnImport").disabled = true; }
+        step(0);
+      });
+
+      /* ---------- Danh sách tài khoản ---------- */
+      var serverAccounts = [];
+      function fmtDate(v) {
+        if (!v) return "—";
+        var d = new Date(v);
+        if (isNaN(d.getTime())) return esc(String(v));
+        return d.toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+      }
+      function renderList() {
+        var wrap = $("listWrap");
+        var q = $("inSearch").value.trim().toLowerCase();
+        var rows = serverAccounts.filter(function (a) {
+          if (!q) return true;
+          return (a.name || "").toLowerCase().indexOf(q) >= 0 || (a.email || "").toLowerCase().indexOf(q) >= 0;
+        });
+        if (!serverAccounts.length) { wrap.innerHTML = ""; return; }
+        if (!rows.length) { wrap.innerHTML = '<div class="empty-note">Không có tài khoản nào khớp với từ khoá tìm kiếm.</div>'; return; }
+        var html = '<div class="table-scroll"><table><thead><tr>' +
+          "<th>Tên</th><th>Email</th><th>Mật khẩu</th><th>Mã 2FA hiện tại</th><th>Ngày tạo</th><th>Thao tác</th>" +
+          "</tr></thead><tbody>";
+        rows.forEach(function (a) {
+          var shown = a._showPw ? esc(a.pass || "") : '<span class="pw-mask">••••••••</span>';
+          var eyeLabel = a._showPw ? "Ẩn" : "Xem";
+          var code = a.code ? '<span class="code6">' + esc(a.code) + '</span>' : '<span class="muted">—</span>';
+          var remain = (a.remain != null && a.code) ? ' <span class="remain">(còn ' + esc(a.remain) + ' giây)</span>' : "";
+          var inactive = a.active === false ? ' <span class="remain">(đã tắt)</span>' : "";
+          html += "<tr>" +
+            "<td><b>" + esc(a.name || "") + "</b>" + inactive + "</td>" +
+            "<td>" + esc(a.email || "") + "</td>" +
+            '<td class="nowrap">' + shown + ' <button type="button" class="icon-btn" data-eye="' + esc(a.id) + '">' + eyeLabel + "</button></td>" +
+            "<td>" + code + remain + "</td>" +
+            "<td>" + fmtDate(a.createdAt) + "</td>" +
+            '<td class="actions">' +
+              '<button type="button" class="btn small" data-copy-link="' + esc(a.id) + '">Copy link</button>' +
+              '<button type="button" class="btn small" data-open-link="' + esc(a.id) + '">Mở link</button>' +
+              '<button type="button" class="btn small danger-outline" data-del="' + esc(a.id) + '" data-del-name="' + esc(a.name || a.email || "") + '">Xoá</button>' +
+            "</td></tr>";
+        });
+        html += "</tbody></table></div>";
+        wrap.innerHTML = html;
+      }
+      function loadList(silent) {
+        saveSettings(true);
+        var s = needSecret(); if (!s) return;
+        var st = $("listStatus");
+        if (!silent) { st.className = "status"; st.textContent = "Đang tải danh sách từ máy chủ…"; }
+        $("btnLoadList").disabled = true;
+        jsonp({ action: "list", secret: s.secret }).then(function (d) {
+          if (!d || !d.ok) throw new Error(apiError(d));
+          serverAccounts = (d.accounts || []).map(function (a) { a._showPw = false; return a; });
+          renderList();
+          st.className = "status ok";
+          st.textContent = "Đã tải " + serverAccounts.length + " tài khoản từ máy chủ.";
+        }).catch(function (e) {
+          st.className = "status err";
+          st.textContent = "Tải danh sách thất bại: " + e.message;
+        }).then(function () { $("btnLoadList").disabled = false; });
+      }
+      $("btnLoadList").addEventListener("click", function () { loadList(false); });
+      $("inSearch").addEventListener("input", renderList);
+
+      /* ---------- Hộp xác nhận xoá ---------- */
+      function confirmDelete(id, label) {
+        var root = $("confirmRoot");
+        root.innerHTML =
+          '<div class="confirm-backdrop"><div class="confirm-box" role="alertdialog" aria-modal="true">' +
+          "<h3>Xoá tài khoản này?</h3>" +
+          "<p>Xoá <b>" + esc(label) + "</b> khỏi máy chủ. <b>Link share của tài khoản này sẽ hết hiệu lực ngay lập tức</b> và người dùng không mở được nữa. Thao tác này không khôi phục được.</p>" +
+          '<div class="btn-row"><button type="button" class="btn" id="cfCancel">Huỷ</button>' +
+          '<button type="button" class="btn danger" id="cfOk">Xoá tài khoản</button></div>' +
+          "</div></div>";
+        function close() { root.innerHTML = ""; }
+        $("cfCancel").addEventListener("click", close);
+        root.firstElementChild.addEventListener("click", function (e) { if (e.target === this) close(); });
+        $("cfOk").addEventListener("click", function () {
+          var s = needSecret(); if (!s) { close(); return; }
+          $("cfOk").disabled = true; $("cfOk").textContent = "Đang xoá…";
+          jsonp({ action: "del", secret: s.secret, id: id }).then(function (d) {
+            if (!d || !d.ok) throw new Error(apiError(d));
+            serverAccounts = serverAccounts.filter(function (a) { return String(a.id) !== String(id); });
+            renderList();
+            toast("Đã xoá tài khoản — link share đã hết hiệu lực");
+          }).catch(function (e) {
+            toast("Xoá thất bại: " + e.message, true);
+          }).then(close);
+        });
+      }
+
+      /* ---------- Sự kiện dùng chung trong các bảng ---------- */
+      document.addEventListener("click", function (e) {
+        var t = e.target;
+        while (t && t !== document.body) {
+          if (t.getAttribute) {
+            var cl = t.getAttribute("data-copy-link");
+            if (cl) { copyShareLink(cl); return; }
+            var ol = t.getAttribute("data-open-link");
+            if (ol) {
+              var link = buildShareLink(ol);
+              if (!link) { toast("Cần điền Địa chỉ trang xem tài khoản ở mục 1 trước", true); $("inViewerBase").focus(); return; }
+              window.open(link, "_blank", "noopener");
+              return;
+            }
+            var eye = t.getAttribute("data-eye");
+            if (eye) {
+              var acc = serverAccounts.filter(function (a) { return String(a.id) === String(eye); })[0];
+              if (acc) { acc._showPw = !acc._showPw; renderList(); }
+              return;
+            }
+            var del = t.getAttribute("data-del");
+            if (del) { confirmDelete(del, t.getAttribute("data-del-name") || del); return; }
+          }
+          t = t.parentNode;
+        }
+      });
+
+      /* ---------- Khởi tạo ---------- */
+      loadSettingsIntoForm();
+      // Đã có sẵn cài đặt thì tự kiểm tra kết nối ngay khi mở trang và tải
+      // luôn danh sách, để thấy trạng thái thật mà không phải bấm dò từng nút.
+      (function () {
+        var s = getSettings();
+        if (s.url && s.secret) {
+          runConnectionCheck(false).then(function (ok) { if (ok) loadList(true); });
+        }
+      })();
+    </script>
+  </body>
+</html>

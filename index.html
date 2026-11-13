@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Xem thông tin tài khoản được chia sẻ và mã dùng 1 lần." />
+    <link rel="icon" href="data:," />
+    <title>Tài khoản được chia sẻ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #eef2f5;
+        --bg-accent: #dfe9ec;
+        --card: #ffffff;
+        --card-border: #dbe3e8;
+        --ink: #12212b;
+        --ink-2: #43565f;
+        --ink-3: #71848e;
+        --line: #e3eaee;
+        --accent: #0b6e63;
+        --accent-strong: #085a51;
+        --accent-soft: #e3f2ef;
+        --otp-bg: #0f2a2e;
+        --otp-ink: #ffffff;
+        --otp-sub: #9fc6c0;
+        --ring-track: #d7e6e2;
+        --ring-bar: #0b6e63;
+        --danger-bg: #fdf0ef;
+        --danger-border: #f2c9c5;
+        --danger-ink: #8f2d24;
+        --btn-ghost: #f2f6f7;
+        --btn-ghost-border: #d5dfe4;
+        --shadow: 0 18px 44px rgba(18, 33, 43, .12), 0 2px 8px rgba(18, 33, 43, .06);
+        color-scheme: light;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b1319;
+          --bg-accent: #0e1b21;
+          --card: #14222b;
+          --card-border: #263842;
+          --ink: #eaf2f4;
+          --ink-2: #b3c4cb;
+          --ink-3: #8499a2;
+          --line: #22353f;
+          --accent: #2fbfab;
+          --accent-strong: #5fd6c6;
+          --accent-soft: #173730;
+          --otp-bg: #0a1e21;
+          --otp-ink: #ffffff;
+          --otp-sub: #8fc7bf;
+          --ring-track: #24443f;
+          --ring-bar: #2fbfab;
+          --danger-bg: #3a1f1d;
+          --danger-border: #6b3733;
+          --danger-ink: #ffb4ab;
+          --btn-ghost: #1b2e38;
+          --btn-ghost-border: #2e4550;
+          --shadow: 0 18px 44px rgba(0, 0, 0, .45), 0 2px 8px rgba(0, 0, 0, .3);
+          color-scheme: dark;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font-family: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(640px 320px at 85% -60px, var(--bg-accent), transparent 70%),
+          var(--bg);
+        color: var(--ink);
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 28px 16px 24px;
+        -webkit-font-smoothing: antialiased;
+      }
+      button { font-family: inherit; cursor: pointer; }
+      button, input, textarea { min-height: 44px; }
+      :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+
+      .wrap { width: 100%; max-width: 470px; margin: auto 0; }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .hidden { display: none !important; }
+
+      /* ---------- Loading ---------- */
+      .state-box { padding: 56px 28px 52px; text-align: center; }
+      .spinner {
+        width: 46px; height: 46px; margin: 0 auto 18px;
+        border-radius: 50%;
+        border: 4px solid var(--ring-track);
+        border-top-color: var(--accent);
+        animation: spin .8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .state-box p { margin: 0; font-size: 16px; font-weight: 600; color: var(--ink-2); }
+
+      /* ---------- Paste-link form ---------- */
+      .form-box { padding: 30px 26px 28px; }
+      .form-icon {
+        width: 52px; height: 52px; border-radius: 14px;
+        background: var(--accent-soft); color: var(--accent);
+        display: grid; place-items: center; margin-bottom: 16px;
+      }
+      .form-box h1 { font-size: 21px; line-height: 1.3; margin: 0 0 8px; font-weight: 800; letter-spacing: -.01em; }
+      .form-box .lead { margin: 0 0 18px; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); }
+      .form-box label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+      .form-box textarea {
+        width: 100%; min-height: 84px; resize: vertical;
+        border: 1.5px solid var(--btn-ghost-border); border-radius: 12px;
+        background: var(--btn-ghost); color: var(--ink);
+        font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 13px; line-height: 1.5;
+        padding: 12px 13px;
+      }
+      .form-box textarea::placeholder { font-family: "Be Vietnam Pro", sans-serif; color: var(--ink-3); }
+      .form-error {
+        display: none; margin: 12px 0 0; padding: 11px 13px;
+        background: var(--danger-bg); border: 1px solid var(--danger-border);
+        border-radius: 10px; color: var(--danger-ink); font-size: 13.5px; line-height: 1.5;
+      }
+      .form-error.show { display: block; }
+      .btn-primary {
+        width: 100%; margin-top: 16px; border: 0; border-radius: 12px;
+        background: var(--accent); color: #fff;
+        font-size: 15.5px; font-weight: 700; padding: 13px 18px; min-height: 50px;
+        transition: background .15s ease;
+      }
+      .btn-primary:hover { background: var(--accent-strong); }
+      @media (prefers-color-scheme: dark) { .btn-primary { color: #06231f; } .btn-primary:hover { color: #06231f; } }
+
+      /* ---------- Error state ---------- */
+      .error-icon {
+        width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 16px;
+        background: var(--danger-bg); border: 1px solid var(--danger-border);
+        color: var(--danger-ink); display: grid; place-items: center;
+      }
+      .state-box h2 { margin: 0 0 8px; font-size: 19px; font-weight: 800; }
+      .state-box .err-msg { margin: 0 auto 20px; max-width: 340px; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); font-weight: 500; overflow-wrap: anywhere; }
+      .btn-retry {
+        border: 0; border-radius: 12px; background: var(--accent); color: #fff;
+        font-size: 15px; font-weight: 700; padding: 12px 26px; min-height: 48px;
+        display: inline-flex; align-items: center; gap: 8px;
+      }
+      @media (prefers-color-scheme: dark) { .btn-retry { color: #06231f; } }
+
+      /* ---------- Account card ---------- */
+      .acct-head { padding: 26px 24px 20px; display: flex; gap: 15px; align-items: center; }
+      .avatar {
+        flex: 0 0 auto; width: 54px; height: 54px; border-radius: 16px;
+        background: var(--accent); color: #fff;
+        display: grid; place-items: center;
+        font-size: 24px; font-weight: 800; text-transform: uppercase;
+      }
+      @media (prefers-color-scheme: dark) { .avatar { color: #06231f; } }
+      .acct-head .who { min-width: 0; }
+      .acct-head h1 {
+        margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -.01em; line-height: 1.25;
+        overflow-wrap: anywhere;
+      }
+      .acct-head .sub { margin: 3px 0 0; font-size: 13.5px; color: var(--ink-3); }
+
+      .rows { padding: 2px 24px 6px; }
+      .row { padding: 14px 0; border-top: 1px solid var(--line); }
+      .row:first-child { border-top: 0; }
+      .row-label {
+        display: block; font-size: 12px; font-weight: 700; letter-spacing: .07em;
+        text-transform: uppercase; color: var(--ink-3); margin-bottom: 7px;
+      }
+      .row-main { display: flex; align-items: center; gap: 8px; }
+      .row-value {
+        flex: 1 1 auto; min-width: 0;
+        font-size: 16px; font-weight: 600; line-height: 1.45;
+        overflow-wrap: anywhere; word-break: break-all;
+      }
+      .row-value.mono { font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 15px; letter-spacing: .01em; }
+      .icon-btn {
+        flex: 0 0 auto; width: 44px; height: 44px; min-height: 44px;
+        border: 1px solid var(--btn-ghost-border); background: var(--btn-ghost);
+        color: var(--ink-2); border-radius: 11px;
+        display: inline-grid; place-items: center;
+        transition: color .15s ease, border-color .15s ease;
+      }
+      .icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+      .btn-copy {
+        flex: 0 0 auto; min-height: 44px; padding: 10px 15px;
+        border: 1px solid transparent; border-radius: 11px;
+        background: var(--accent-soft); color: var(--accent);
+        font-size: 14px; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 7px;
+        transition: background .15s ease;
+      }
+      .btn-copy:hover { filter: brightness(.97); }
+      .btn-copy.copied { background: var(--accent); color: #fff; }
+      @media (prefers-color-scheme: dark) { .btn-copy.copied { color: #06231f; } }
+
+      /* ---------- OTP ---------- */
+      .otp {
+        margin: 14px 16px 16px; border-radius: 16px;
+        background: var(--otp-bg); color: var(--otp-ink);
+        padding: 20px 20px 18px;
+      }
+      .otp-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+      .otp-label { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--otp-sub); }
+      .otp-code {
+        margin-top: 6px;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 42px; font-weight: 700; letter-spacing: .14em; line-height: 1.1;
+        font-variant-numeric: tabular-nums; white-space: nowrap;
+      }
+      .otp-code.refreshing { opacity: .35; }
+      .ring-wrap { flex: 0 0 auto; position: relative; width: 56px; height: 56px; }
+      .ring-wrap svg { transform: rotate(-90deg); display: block; }
+      .ring-track { stroke: rgba(255,255,255,.16); }
+      .ring-bar { stroke: #43d3bd; transition: stroke-dashoffset .95s linear; }
+      .ring-num {
+        position: absolute; inset: 0; display: grid; place-items: center;
+        font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums;
+      }
+      .otp-note { margin: 8px 0 0; font-size: 13px; color: var(--otp-sub); line-height: 1.5; }
+      .otp-actions { display: flex; gap: 10px; margin-top: 16px; }
+      .otp-actions .btn-copy {
+        flex: 1 1 auto; justify-content: center; min-height: 48px;
+        background: #ffffff; color: #0f2a2e; font-size: 15px;
+      }
+      .otp-actions .btn-copy.copied { background: #43d3bd; color: #06231f; }
+      .btn-refresh {
+        flex: 1 1 auto; min-height: 48px; padding: 11px 14px;
+        border-radius: 11px; border: 1px solid rgba(255,255,255,.35);
+        background: transparent; color: #fff;
+        font-size: 15px; font-weight: 700;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      }
+      .btn-refresh:hover { border-color: #fff; }
+      .btn-refresh:disabled { opacity: .55; cursor: wait; }
+      .btn-refresh svg.spinning { animation: spin .7s linear infinite; }
+
+      .privacy-note {
+        margin: 18px auto 0; max-width: 470px; width: 100%;
+        display: flex; gap: 9px; align-items: flex-start;
+        color: var(--ink-3); font-size: 13px; line-height: 1.55; padding: 0 6px;
+      }
+      .privacy-note svg { flex: 0 0 auto; margin-top: 1px; }
+
+      /* ---------- Toast ---------- */
+      .toast {
+        position: fixed; left: 50%; bottom: max(22px, env(safe-area-inset-bottom));
+        transform: translate(-50%, 16px);
+        background: var(--ink); color: var(--card);
+        font-size: 14.5px; font-weight: 600;
+        padding: 12px 20px; border-radius: 999px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.28);
+        opacity: 0; pointer-events: none;
+        transition: opacity .2s ease, transform .2s ease;
+        display: flex; align-items: center; gap: 8px; z-index: 50;
+        max-width: calc(100vw - 32px); text-align: center;
+      }
+      .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+      @media (max-width: 380px) {
+        .otp-code { font-size: 36px; letter-spacing: .1em; }
+        .acct-head, .rows { padding-left: 18px; padding-right: 18px; }
+        .otp { margin-left: 12px; margin-right: 12px; padding: 18px 16px 16px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .spinner, .btn-refresh svg.spinning { animation: none; }
+        .ring-bar { transition: none; }
+        .toast { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <!-- Nhập liên kết khi link thiếu tham số -->
+      <section class="card hidden" id="view-input" aria-labelledby="input-title">
+        <div class="form-box">
+          <div class="form-icon" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <h1 id="input-title">Mở tài khoản được chia sẻ</h1>
+          <p class="lead">Dán toàn bộ liên kết được chia sẻ vào ô dưới đây, trang sẽ tự nhận diện và hiển thị thông tin tài khoản cho bạn.</p>
+          <label for="link-input">Liên kết được chia sẻ</label>
+          <textarea id="link-input" rows="3" placeholder="Dán liên kết vào đây…" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+          <p class="form-error" id="input-error" role="alert"></p>
+          <button class="btn-primary" id="btn-open-link" type="button">Mở tài khoản</button>
+        </div>
+      </section>
+
+      <!-- Đang tải -->
+      <section class="card hidden" id="view-loading" aria-live="polite">
+        <div class="state-box">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Đang tải tài khoản…</p>
+        </div>
+      </section>
+
+      <!-- Lỗi -->
+      <section class="card hidden" id="view-error">
+        <div class="state-box">
+          <div class="error-icon" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h2>Chưa tải được tài khoản</h2>
+          <p class="err-msg" id="error-message">Đã xảy ra lỗi.</p>
+          <button class="btn-retry" id="btn-retry" type="button">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+            Thử lại
+          </button>
+        </div>
+      </section>
+
+      <!-- Tài khoản -->
+      <section class="card hidden" id="view-account" aria-labelledby="acct-name">
+        <div class="acct-head">
+          <div class="avatar" id="acct-avatar" aria-hidden="true">?</div>
+          <div class="who">
+            <h1 id="acct-name">Tài khoản</h1>
+            <p class="sub">Thông tin đăng nhập được chia sẻ với bạn</p>
+          </div>
+        </div>
+
+        <div class="rows">
+          <div class="row">
+            <span class="row-label" id="lbl-email">Email</span>
+            <div class="row-main">
+              <span class="row-value mono" id="val-email" aria-labelledby="lbl-email">—</span>
+              <button class="btn-copy" id="copy-email" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="row">
+            <span class="row-label" id="lbl-pass">Mật khẩu</span>
+            <div class="row-main">
+              <span class="row-value mono" id="val-pass" aria-labelledby="lbl-pass">—</span>
+              <button class="icon-btn" id="toggle-pass" type="button" aria-label="Hiện mật khẩu" aria-pressed="false">
+                <svg id="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg id="eye-closed" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+              <button class="btn-copy" id="copy-pass" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="otp">
+          <div class="otp-top">
+            <div>
+              <span class="otp-label">Mã dùng 1 lần</span>
+              <div class="otp-code" id="val-code" aria-live="polite">––– –––</div>
+            </div>
+            <div class="ring-wrap" role="img" aria-label="Thời gian còn lại của mã">
+              <svg width="56" height="56" viewBox="0 0 56 56">
+                <circle class="ring-track" cx="28" cy="28" r="24" fill="none" stroke-width="5"/>
+                <circle class="ring-bar" id="ring-bar" cx="28" cy="28" r="24" fill="none" stroke-width="5" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="0"/>
+              </svg>
+              <div class="ring-num" id="ring-num">30</div>
+            </div>
+          </div>
+          <p class="otp-note">Mã tự thay đổi sau mỗi 30 giây. Nhập mã ngay khi được yêu cầu đăng nhập.</p>
+          <div class="otp-actions">
+            <button class="btn-copy" id="copy-code" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy mã
+            </button>
+            <button class="btn-refresh" id="btn-refresh" type="button">
+              <svg id="refresh-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+              Làm mới mã
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <p class="privacy-note">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Giữ liên kết này riêng tư, không chia sẻ cho người khác. Ai có liên kết cũng xem được thông tin tài khoản ở trên.</span>
+      </p>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="toast-text">Đã sao chép</span>
+    </div>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var RING_C = 150.8; // 2 * PI * 24
+        var TIMEOUT_MS = 15000;
+
+        var views = {
+          input: document.getElementById('view-input'),
+          loading: document.getElementById('view-loading'),
+          error: document.getElementById('view-error'),
+          account: document.getElementById('view-account')
+        };
+        var els = {
+          linkInput: document.getElementById('link-input'),
+          inputError: document.getElementById('input-error'),
+          btnOpen: document.getElementById('btn-open-link'),
+          errorMessage: document.getElementById('error-message'),
+          btnRetry: document.getElementById('btn-retry'),
+          name: document.getElementById('acct-name'),
+          avatar: document.getElementById('acct-avatar'),
+          email: document.getElementById('val-email'),
+          pass: document.getElementById('val-pass'),
+          code: document.getElementById('val-code'),
+          ringBar: document.getElementById('ring-bar'),
+          ringNum: document.getElementById('ring-num'),
+          togglePass: document.getElementById('toggle-pass'),
+          eyeOpen: document.getElementById('eye-open'),
+          eyeClosed: document.getElementById('eye-closed'),
+          copyEmail: document.getElementById('copy-email'),
+          copyPass: document.getElementById('copy-pass'),
+          copyCode: document.getElementById('copy-code'),
+          btnRefresh: document.getElementById('btn-refresh'),
+          refreshIcon: document.getElementById('refresh-icon'),
+          toast: document.getElementById('toast'),
+          toastText: document.getElementById('toast-text')
+        };
+
+        var state = {
+          token: null,
+          apiUrl: null,
+          data: null,          // {name, email, pass, code}
+          passVisible: false,
+          remain: 0,
+          remainMax: 30,
+          timerId: null,
+          fetching: false,
+          toastId: null
+        };
+
+        /* ---------------- Views ---------------- */
+        function show(name) {
+          Object.keys(views).forEach(function (k) {
+            views[k].classList.toggle('hidden', k !== name);
+          });
+        }
+
+        /* ---------------- Parse link params ---------------- */
+        function decodeB(b) {
+          var s = String(b).replace(/-/g, '+').replace(/_/g, '/');
+          while (s.length % 4 !== 0) s += '=';
+          return atob(s);
+        }
+
+        // Extract {s, b} from any string: full URL, hash fragment, or query string.
+        function extractParams(str) {
+          if (!str) return null;
+          str = String(str).trim();
+          var s = null, b = null;
+
+          function grab(text) {
+            if (!text) return;
+            try {
+              var p = new URLSearchParams(text);
+              if (!s && p.get('s')) s = p.get('s');
+              if (!b && p.get('b')) b = p.get('b');
+            } catch (e) { /* ignore */ }
+          }
+
+          // Hash part first (primary format), then query part.
+          var hashIdx = str.indexOf('#');
+          if (hashIdx >= 0) grab(str.slice(hashIdx + 1));
+          var qIdx = str.indexOf('?');
+          if (qIdx >= 0) {
+            var qEnd = hashIdx > qIdx ? hashIdx : str.length;
+            grab(str.slice(qIdx + 1, qEnd));
+          }
+          // Fallback: raw scan (handles links mangled by chat apps).
+          if (!s || !b) {
+            var ms = str.match(/[?&#]s=([^&#\s]+)/);
+            var mb = str.match(/[?&#]b=([^&#\s]+)/);
+            if (!s && ms) { try { s = decodeURIComponent(ms[1]); } catch (e) { s = ms[1]; } }
+            if (!b && mb) { try { b = decodeURIComponent(mb[1]); } catch (e) { b = mb[1]; } }
+          }
+          if (!s || !b) return null;
+          return { s: s, b: b };
+        }
+
+        function resolveApiUrl(b) {
+          var url = decodeB(b);
+          if (!/^https:\/\//i.test(url)) throw new Error('bad-url');
+          return url;
+        }
+
+        /* ---------------- JSONP ---------------- */
+        function jsonp(url) {
+          return new Promise(function (resolve, reject) {
+            var cbName = '__cb_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+            var script = document.createElement('script');
+            var done = false;
+            var timer = setTimeout(function () {
+              finish(new Error('timeout'));
+            }, TIMEOUT_MS);
+
+            function cleanup() {
+              clearTimeout(timer);
+              try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+              if (script.parentNode) script.parentNode.removeChild(script);
+            }
+            function finish(err, data) {
+              if (done) return;
+              done = true;
+              cleanup();
+              if (err) reject(err); else resolve(data);
+            }
+
+            window[cbName] = function (data) { finish(null, data); };
+            script.onerror = function () { finish(new Error('network')); };
+            var sep = url.indexOf('?') >= 0 ? '&' : '?';
+            script.src = url + sep + 'callback=' + encodeURIComponent(cbName);
+            document.head.appendChild(script);
+          });
+        }
+
+        /* ---------------- Fetch account ---------------- */
+        function fetchAccount(full) {
+          if (state.fetching || !state.token || !state.apiUrl) return;
+          state.fetching = true;
+          if (full) {
+            stopCountdown();
+            show('loading');
+          } else {
+            els.code.classList.add('refreshing');
+            els.btnRefresh.disabled = true;
+            els.refreshIcon.classList.add('spinning');
+          }
+          var sep = state.apiUrl.indexOf('?') >= 0 ? '&' : '?';
+          var url = state.apiUrl + sep + 'action=view&s=' + encodeURIComponent(state.token);
+          jsonp(url).then(function (res) {
+            state.fetching = false;
+            els.btnRefresh.disabled = false;
+            els.refreshIcon.classList.remove('spinning');
+            els.code.classList.remove('refreshing');
+            if (!res || res.ok !== true) {
+              var msg = res && res.error ? String(res.error) : 'Liên kết không còn hiệu lực hoặc tài khoản không tồn tại.';
+              showError(msg);
+              return;
+            }
+            state.data = {
+              name: res.name ? String(res.name) : 'Tài khoản',
+              email: res.email ? String(res.email) : '',
+              pass: res.pass != null ? String(res.pass) : '',
+              code: res.code != null ? String(res.code).replace(/\s+/g, '') : ''
+            };
+            var remain = parseInt(res.remain, 10);
+            if (isNaN(remain) || remain < 1) remain = 30;
+            if (remain > 30) remain = 30;
+            state.remain = remain;
+            state.remainMax = 30;
+            renderAccount();
+            show('account');
+            startCountdown();
+          }).catch(function () {
+            state.fetching = false;
+            els.btnRefresh.disabled = false;
+            els.refreshIcon.classList.remove('spinning');
+            els.code.classList.remove('refreshing');
+            showError('Không tải được tài khoản. Vui lòng kiểm tra kết nối mạng rồi thử lại.');
+          });
+        }
+
+        function showError(msg) {
+          stopCountdown();
+          els.errorMessage.textContent = msg;
+          show('error');
+        }
+
+        /* ---------------- Render ---------------- */
+        function formatCode(code) {
+          var c = String(code || '').replace(/\s+/g, '');
+          if (c.length === 6) return c.slice(0, 3) + ' ' + c.slice(3);
+          return c || '––– –––';
+        }
+        function maskedPass(p) {
+          if (!p) return '—';
+          var out = '';
+          for (var i = 0; i < Math.min(p.length, 16); i++) out += '•';
+          return out;
+        }
+        function renderAccount() {
+          var d = state.data;
+          els.name.textContent = d.name;
+          var initial = d.name.trim().charAt(0) || '?';
+          els.avatar.textContent = initial;
+          els.email.textContent = d.email || '—';
+          els.pass.textContent = state.passVisible ? d.pass : maskedPass(d.pass);
+          els.code.textContent = formatCode(d.code);
+          updateRing();
+        }
+        function updateRing() {
+          var frac = state.remainMax > 0 ? state.remain / state.remainMax : 0;
+          if (frac < 0) frac = 0;
+          if (frac > 1) frac = 1;
+          els.ringBar.style.strokeDashoffset = String(RING_C * (1 - frac));
+          els.ringNum.textContent = String(state.remain);
+        }
+
+        /* ---------------- Countdown ---------------- */
+        function startCountdown() {
+          stopCountdown();
+          updateRing();
+          state.timerId = setInterval(function () {
+            state.remain -= 1;
+            if (state.remain <= 0) {
+              state.remain = 0;
+              updateRing();
+              stopCountdown();
+              fetchAccount(false);
+              return;
+            }
+            updateRing();
+          }, 1000);
+        }
+        function stopCountdown() {
+          if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
+        }
+
+        /* ---------------- Copy ---------------- */
+        function fallbackCopy(text) {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.top = '0';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          ta.setSelectionRange(0, ta.value.length);
+          var ok = false;
+          try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+          document.body.removeChild(ta);
+          return ok;
+        }
+        function copyText(text, btn) {
+          if (!text) { showToast('Không có nội dung để sao chép'); return; }
+          function done() {
+            showToast('Đã sao chép');
+            if (btn) {
+              btn.classList.add('copied');
+              setTimeout(function () { btn.classList.remove('copied'); }, 1200);
+            }
+          }
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(done).catch(function () {
+              if (fallbackCopy(text)) done(); else showToast('Không sao chép được, hãy chọn và chép thủ công');
+            });
+          } else {
+            if (fallbackCopy(text)) done(); else showToast('Không sao chép được, hãy chọn và chép thủ công');
+          }
+        }
+        function showToast(msg) {
+          els.toastText.textContent = msg;
+          els.toast.classList.add('show');
+          if (state.toastId) clearTimeout(state.toastId);
+          state.toastId = setTimeout(function () { els.toast.classList.remove('show'); }, 1900);
+        }
+
+        /* ---------------- Events ---------------- */
+        els.togglePass.addEventListener('click', function () {
+          state.passVisible = !state.passVisible;
+          els.togglePass.setAttribute('aria-pressed', state.passVisible ? 'true' : 'false');
+          els.togglePass.setAttribute('aria-label', state.passVisible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+          els.eyeOpen.classList.toggle('hidden', state.passVisible);
+          els.eyeClosed.classList.toggle('hidden', !state.passVisible);
+          if (state.data) els.pass.textContent = state.passVisible ? state.data.pass : maskedPass(state.data.pass);
+        });
+        els.copyEmail.addEventListener('click', function () {
+          if (state.data) copyText(state.data.email, els.copyEmail);
+        });
+        els.copyPass.addEventListener('click', function () {
+          if (state.data) copyText(state.data.pass, els.copyPass);
+        });
+        els.copyCode.addEventListener('click', function () {
+          if (state.data) copyText(state.data.code.replace(/\s+/g, ''), els.copyCode);
+        });
+        els.btnRefresh.addEventListener('click', function () { fetchAccount(false); });
+        els.btnRetry.addEventListener('click', function () { fetchAccount(true); });
+
+        function startWithParams(params, updateHash) {
+          try {
+            state.apiUrl = resolveApiUrl(params.b);
+          } catch (e) {
+            state.apiUrl = null;
+            return false;
+          }
+          state.token = params.s;
+          if (updateHash) {
+            try {
+              history.replaceState(null, '', '#s=' + encodeURIComponent(params.s) + '&b=' + encodeURIComponent(params.b));
+            } catch (e) { /* ignore */ }
+          }
+          fetchAccount(true);
+          return true;
+        }
+
+        els.btnOpen.addEventListener('click', function () {
+          var raw = els.linkInput.value;
+          els.inputError.classList.remove('show');
+          if (!raw || !raw.trim()) {
+            els.inputError.textContent = 'Bạn chưa dán liên kết. Hãy dán toàn bộ liên kết được chia sẻ vào ô trên.';
+            els.inputError.classList.add('show');
+            return;
+          }
+          var params = extractParams(raw);
+          if (!params) {
+            els.inputError.textContent = 'Chưa nhận diện được liên kết này. Hãy kiểm tra lại và dán đúng toàn bộ liên kết được chia sẻ.';
+            els.inputError.classList.add('show');
+            return;
+          }
+          if (!startWithParams(params, true)) {
+            els.inputError.textContent = 'Liên kết này không hợp lệ. Hãy kiểm tra lại và dán đúng toàn bộ liên kết được chia sẻ.';
+            els.inputError.classList.add('show');
+          }
+        });
+        els.linkInput.addEventListener('keydown', function (ev) {
+          if ((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter') els.btnOpen.click();
+        });
+        els.linkInput.addEventListener('paste', function () {
+          setTimeout(function () {
+            var params = extractParams(els.linkInput.value);
+            if (params) els.btnOpen.click();
+          }, 60);
+        });
+
+        document.addEventListener('visibilitychange', function () {
+          // When returning to the tab with an expired code, refresh promptly.
+          if (!document.hidden && state.data && state.remain <= 0 && !state.fetching) {
+            fetchAccount(false);
+          }
+        });
+
+        /* ---------------- Boot ---------------- */
+        var initial = extractParams(window.location.hash || '') || extractParams(window.location.search || '');
+        if (initial) {
+          if (!startWithParams(initial, false)) {
+            show('input');
+            els.inputError.textContent = 'Liên kết này không hợp lệ. Hãy dán lại toàn bộ liên kết được chia sẻ vào ô dưới đây.';
+            els.inputError.classList.add('show');
+          }
+        } else {
+          show('input');
+        }
+      })();
+    </script>
+  </body>
+</html>
